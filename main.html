@@ -1,0 +1,2950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cosmic Pokémon Genealogical & Mythological Tree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #facc15;
+            --blue: #38bdf8;
+            --red: #f87171;
+            --purple: #e879f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            overflow: hidden;
+            background-color: #050811;
+            font-family: 'Inter', sans-serif;
+            color: #f8fafc;
+        }
+
+        .font-myth {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Cosmic backdrop with warm golden radial glow around Arceus transitioning into deep space */
+        .cosmic-backdrop {
+            background: 
+                radial-gradient(ellipse 85% 42% at 50% 0%, rgba(234, 152, 58, 0.56) 0%, rgba(168, 96, 52, 0.24) 36%, rgba(28, 36, 74, 0.45) 70%, rgba(5, 8, 17, 1) 100%),
+                linear-gradient(180deg, #2b1d16 0%, #151a30 46%, #050811 100%);
+        }
+
+        #starfield {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #viewport {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            cursor: grab;
+            z-index: 5;
+            touch-action: none;
+        }
+
+        #viewport:active {
+            cursor: grabbing;
+        }
+
+        #world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4800px;
+            height: 3300px;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        /* Regional & Thematic Group Containers */
+        .region-box {
+            position: absolute;
+            border-radius: 24px;
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
+            background: rgba(12, 18, 36, 0.36);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 14px 44px rgba(0, 0, 0, 0.42), inset 0 0 28px rgba(255, 255, 255, 0.03);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        .region-box.active-region {
+            border-color: rgba(250, 204, 21, 0.72);
+            background: rgba(26, 36, 62, 0.48);
+            box-shadow: 0 0 40px rgba(250, 204, 21, 0.22);
+        }
+
+        .region-title {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 3px 18px;
+            border-radius: 999px;
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+            background: rgba(8, 12, 24, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Pokémon Circular Nodes */
+        .poke-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease, opacity 0.25s ease;
+        }
+
+        .poke-node:hover {
+            transform: translate(-50%, -50%) scale(1.13);
+            z-index: 45;
+        }
+
+        .poke-node.selected .node-circle {
+            box-shadow: 0 0 0 4px #ffffff, 0 0 30px 8px rgba(250, 204, 21, 0.9) !important;
+            transform: scale(1.07);
+        }
+
+        .poke-node.dimmed {
+            opacity: 0.16;
+            filter: grayscale(85%);
+        }
+
+        .node-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, #2a334e 0%, #101524 75%, #070911 100%);
+            border: 3.5px solid var(--ring-color, #facc15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), 0 0 15px var(--ring-glow, rgba(250, 204, 21, 0.35));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+            position: relative;
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+        }
+
+        .poke-node.supreme .node-circle {
+            width: 118px;
+            height: 118px;
+            border-width: 4.5px;
+            box-shadow: 0 0 42px rgba(250, 204, 21, 0.75), inset 0 0 20px rgba(250, 204, 21, 0.35);
+        }
+
+        .node-circle img {
+            width: 96%;
+            height: 96%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
+            pointer-events: none;
+            transition: transform 0.25s ease;
+        }
+
+        .poke-node:hover .node-circle img {
+            transform: scale(1.08);
+        }
+
+        .node-badge-tag {
+            position: absolute;
+            top: -5px;
+            right: -6px;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            padding: 1.5px 5px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .node-label {
+            margin-top: 5px;
+            text-align: center;
+            pointer-events: none;
+            background: rgba(6, 9, 18, 0.78);
+            padding: 2.5px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            max-width: 145px;
+        }
+
+        .node-name {
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #ffffff;
+            line-height: 1.15;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+        }
+
+        .node-role {
+            font-size: 8.5px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #cbd5e1;
+            opacity: 0.88;
+            line-height: 1.1;
+            margin-top: 1px;
+        }
+
+        /* SVG Connections Layer */
+        #connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4800px;
+            height: 3300px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .conn-line {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: opacity 0.25s ease, stroke-width 0.25s ease;
+        }
+
+        .conn-line.dimmed {
+            opacity: 0.06 !important;
+        }
+
+        .conn-line.highlighted {
+            opacity: 1 !important;
+            stroke-width: 4.5px !important;
+            filter: drop-shadow(0 0 7px currentColor);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(250, 204, 21, 0.65);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="cosmic-backdrop">
+
+    <canvas id="starfield"></canvas>
+
+    <!-- Top Navigation, Search, Category Filter & Connection Legend -->
+    <header class="fixed top-3 left-3 right-3 z-40 flex flex-col xl:flex-row xl:items-start xl:justify-between gap-2.5 pointer-events-none">
+        <!-- Left Cluster: Title + Search + Category Filter Pills -->
+        <div class="flex flex-col gap-2 pointer-events-auto">
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="bg-slate-950/88 backdrop-blur-md border border-amber-400/35 rounded-2xl px-4 py-2 shadow-2xl flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-200 flex items-center justify-center text-slate-950 font-black shadow-md">
+                        ✦
+                    </div>
+                    <div>
+                        <h1 class="font-myth text-sm sm:text-base font-bold tracking-wider text-amber-200 leading-tight">
+                            COSMIC POKÉMON ENCYCLOPEDIA
+                        </h1>
+                        <p class="text-[11px] text-slate-400 hidden sm:block">Mythological Lineage Tree & Complete 1,025 National Pokédex</p>
+                    </div>
+                </div>
+
+                <!-- Primary Mode / Tab Switcher -->
+                <div class="bg-slate-950/92 backdrop-blur-md border border-slate-700/90 p-1 rounded-2xl shadow-2xl flex items-center gap-1">
+                    <button id="mode-tree-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md transition flex items-center gap-1.5">
+                        <span>✦</span>
+                        <span>Genealogy Tree</span>
+                    </button>
+                    <button id="mode-dex-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                        <span>◉</span>
+                        <span>National Pokédex (1,025)</span>
+                    </button>
+                    <button id="mode-quiz-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                        <span>✧</span>
+                        <span>Pokémon Quiz</span>
+                    </button>
+                </div>
+
+                <!-- Tree Search Bar -->
+                <div id="tree-search-wrap" class="relative flex-1 sm:flex-initial min-w-[210px] sm:w-64">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search tree Pokémon, UB, or role..." 
+                        class="w-full bg-slate-950/88 backdrop-blur-md border border-slate-700/80 focus:border-amber-400 rounded-2xl pl-9 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-400 outline-none shadow-2xl transition"
+                    >
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <button id="clear-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold px-1">✕</button>
+                    <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-2xl shadow-2xl max-h-64 overflow-y-auto custom-scroll z-50"></div>
+                </div>
+            </div>
+
+            <!-- Category Filter Pills (Tree Mode) -->
+            <div id="tree-cat-bar" class="flex flex-wrap items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 p-1.5 rounded-2xl shadow-xl self-start">
+                <button data-cat="all" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-bold bg-amber-400 text-slate-950 transition">
+                    All Entities (<span id="count-all">0</span>)
+                </button>
+                <button data-cat="Legendary" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-sky-200 hover:bg-white/10 transition">
+                    Legendaries (<span id="count-leg">0</span>)
+                </button>
+                <button data-cat="Mythical" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-pink-200 hover:bg-white/10 transition">
+                    Mythicals (<span id="count-myth">0</span>)
+                </button>
+                <button data-cat="Ultra Beast" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-purple-200 hover:bg-white/10 transition">
+                    Ultra Beasts (<span id="count-ub">0</span>)
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Cluster: Connection Legend (Tree Mode) -->
+        <div id="tree-legend-box" class="pointer-events-auto self-end xl:self-auto bg-slate-950/88 backdrop-blur-md border border-slate-700/80 rounded-2xl px-3.5 py-2.5 shadow-2xl">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center justify-between gap-4">
+                <span>Lineage Legend (Click to Filter)</span>
+                <button id="reset-filter-btn" class="hidden text-amber-400 hover:underline text-[10px] font-bold">Reset Filters</button>
+            </div>
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold">
+                <button data-rel="created" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-5 h-1 rounded-full bg-[#facc15] shadow-[0_0_8px_#facc15]"></span>
+                    <span class="text-amber-200 text-[11px] tracking-wide">CREATED / ORIGIN</span>
+                </button>
+                <button data-rel="related" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-5 h-1 rounded-full bg-[#38bdf8] shadow-[0_0_8px_#38bdf8]"></span>
+                    <span class="text-sky-200 text-[11px] tracking-wide">RELATED / DUO / TRIO</span>
+                </button>
+                <button data-rel="controls" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-5 h-1 rounded-full bg-[#f87171] shadow-[0_0_8px_#f87171]"></span>
+                    <span class="text-rose-200 text-[11px] tracking-wide">CONTROLS / MASTER</span>
+                </button>
+                <button data-rel="cloned" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-5 h-0.5 border-t-2 border-dashed border-[#e879f9]"></span>
+                    <span class="text-fuchsia-200 text-[11px] tracking-wide">CLONE / FORM / PARADOX</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Quick-Jump Region & Group Bar -->
+    <nav id="tree-bottom-nav" class="fixed bottom-3 left-3 right-3 sm:right-auto sm:max-w-[calc(100vw-210px)] z-40 pointer-events-auto">
+        <div id="region-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-slate-950/88 backdrop-blur-md border border-slate-700/80 p-1.5 rounded-2xl shadow-2xl">
+            <!-- Populated by JS -->
+        </div>
+    </nav>
+
+    <!-- Zoom & Fit-to-Screen Controls -->
+    <div id="tree-zoom-controls" class="fixed bottom-16 sm:bottom-3 right-3 z-40 flex sm:flex-row flex-col items-center gap-1.5 bg-slate-950/88 backdrop-blur-md border border-slate-700/80 p-1.5 rounded-2xl shadow-2xl pointer-events-auto">
+        <button id="zoom-in" title="Zoom In" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 flex items-center justify-center font-bold text-lg transition">+</button>
+        <span id="zoom-level" class="text-[11px] font-mono text-slate-300 px-1.5 min-w-[44px] text-center">42%</span>
+        <button id="zoom-out" title="Zoom Out" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 flex items-center justify-center font-bold text-lg transition">−</button>
+        <button id="zoom-reset" title="Fit Entire Tree to Screen" class="px-2.5 h-9 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold transition">Fit Screen</button>
+    </div>
+
+    <!-- Interactive Cosmic Canvas -->
+    <main id="viewport">
+        <div id="world">
+            <div id="regions-layer"></div>
+            <svg id="connections-svg" viewBox="0 0 4800 3300">
+                <defs>
+                    <marker id="arrow-created" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#facc15"/>
+                    </marker>
+                    <marker id="arrow-controls" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#f87171"/>
+                    </marker>
+                    <marker id="arrow-cloned" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#e879f9"/>
+                    </marker>
+                </defs>
+            </svg>
+            <div id="nodes-layer"></div>
+        </div>
+    </main>
+
+    <!-- =====================================================================
+         SECOND VIEW: COMPLETE NATIONAL POKÉDEX (ALL 1,025 POKÉMON, GEN 1–9)
+         ===================================================================== -->
+    <section id="pokedex-view" class="hidden fixed inset-0 z-20 pt-24 sm:pt-20 pb-4 px-3 sm:px-6 overflow-y-auto custom-scroll">
+        <div class="max-w-[1600px] mx-auto space-y-4">
+            <!-- Region Tabs & Filter Controls Bar -->
+            <div class="bg-slate-950/88 backdrop-blur-xl border border-slate-800/90 rounded-3xl p-3.5 sm:p-4 shadow-2xl space-y-3">
+                <!-- Region Pills -->
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1" id="dex-region-tabs">
+                    <!-- Populated via JS -->
+                </div>
+
+                <!-- Search, Type Filter & Rarity Filter -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center">
+                    <div class="relative md:col-span-5">
+                        <input
+                            type="text"
+                            id="dex-search-input"
+                            placeholder="Search all 1,025 Pokémon by name or #Dex (e.g. Charizard, #006)..."
+                            class="w-full bg-slate-900/95 border border-slate-700/80 focus:border-amber-400 rounded-2xl pl-9 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-400 outline-none transition"
+                        >
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <button id="dex-clear-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold px-1">✕</button>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <select id="dex-type-filter" class="w-full bg-slate-900/95 border border-slate-700/80 focus:border-amber-400 rounded-2xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 outline-none cursor-pointer">
+                            <option value="all">All Elemental Types</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Fire">Fire</option>
+                            <option value="Water">Water</option>
+                            <option value="Grass">Grass</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Ice">Ice</option>
+                            <option value="Fighting">Fighting</option>
+                            <option value="Poison">Poison</option>
+                            <option value="Ground">Ground</option>
+                            <option value="Flying">Flying</option>
+                            <option value="Psychic">Psychic</option>
+                            <option value="Bug">Bug</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Ghost">Ghost</option>
+                            <option value="Dragon">Dragon</option>
+                            <option value="Dark">Dark</option>
+                            <option value="Steel">Steel</option>
+                            <option value="Fairy">Fairy</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-4 flex flex-wrap items-center justify-between gap-2">
+                        <select id="dex-rarity-filter" class="flex-1 bg-slate-900/95 border border-slate-700/80 focus:border-amber-400 rounded-2xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 outline-none cursor-pointer">
+                            <option value="all">All Classifications</option>
+                            <option value="Regular">Standard Pokémon</option>
+                            <option value="Legendary">Legendary Pokémon</option>
+                            <option value="Mythical">Mythical Pokémon</option>
+                            <option value="Ultra Beast">Ultra Beasts</option>
+                        </select>
+                        <div class="px-3 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs font-mono text-amber-300 whitespace-nowrap">
+                            <span id="dex-showing-count">1,025</span> Shown
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pokédex Cards Grid -->
+            <div id="dex-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Load More / Status Footer -->
+            <div id="dex-footer" class="py-6 flex flex-col items-center justify-center gap-3 text-center">
+                <p id="dex-status-text" class="text-xs text-slate-400">Loading National Pokédex index...</p>
+                <button id="dex-load-more" class="hidden px-5 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-lg transition">
+                    Load More Pokémon
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- THIRD VIEW: DYNAMIC POKÉMON QUIZ -->
+    <section id="quiz-view" class="hidden fixed inset-0 z-20 pt-28 sm:pt-24 pb-8 px-3 sm:px-6 overflow-y-auto custom-scroll">
+        <div class="max-w-4xl mx-auto space-y-5">
+            <div class="rounded-3xl border border-amber-400/25 bg-slate-950/85 backdrop-blur-xl p-5 sm:p-7 shadow-2xl">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[.25em] text-amber-300 font-bold">Knowledge trial</p>
+                        <h2 class="font-myth text-2xl sm:text-3xl text-white font-black mt-1">Pokémon Quiz</h2>
+                        <p class="text-sm text-slate-400 mt-2">Questions are randomly generated from different categories and Pokémon. There is no fixed question list.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2 text-center">
+                            <div class="text-[10px] uppercase text-slate-500">Score</div>
+                            <div id="quiz-score" class="text-xl font-black text-amber-300">0</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2 text-center">
+                            <div class="text-[10px] uppercase text-slate-500">Streak</div>
+                            <div id="quiz-streak" class="text-xl font-black text-emerald-300">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5 flex flex-wrap gap-2 items-center">
+                    <label for="quiz-category" class="text-xs text-slate-400 font-semibold">Category:</label>
+                    <select id="quiz-category" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <option value="mixed">A bit of everything</option>
+                        <option value="image">Guess by Image</option>
+                        <option value="types">Pokémon Types</option>
+                        <option value="regions">Regions & Generations</option>
+                        <option value="abilities">Abilities</option>
+                        <option value="stats">Stats</option>
+                        <option value="dex">National Pokédex</option>
+                    </select>
+                    <button id="quiz-new-btn" class="ml-auto rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs px-4 py-2 transition">New Question ↻</button>
+                </div>
+            </div>
+            <div id="quiz-card" class="rounded-3xl border border-slate-800 bg-slate-950/90 p-5 sm:p-8 shadow-2xl min-h-[340px]">
+                <div id="quiz-loading" class="py-16 text-center text-slate-400 text-sm">Preparing a question...</div>
+                <div id="quiz-content" class="hidden space-y-6">
+                    <div class="flex items-center justify-between gap-3">
+                        <span id="quiz-kind" class="rounded-full bg-purple-500/15 border border-purple-400/25 px-3 py-1 text-[10px] uppercase tracking-wider font-bold text-purple-200">Category</span>
+                        <span id="quiz-progress" class="text-xs text-slate-500">Question 1</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div id="quiz-art-wrap" class="hidden w-36 h-36 sm:w-44 sm:h-44 shrink-0 rounded-full bg-slate-900/80 border border-slate-800 flex items-center justify-center p-2 shadow-inner">
+                            <img id="quiz-art" class="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.85)]" alt="Mystery Pokémon">
+                        </div>
+                        <h3 id="quiz-question" class="text-lg sm:text-xl font-bold text-white leading-relaxed text-center sm:text-left">...</h3>
+                    </div>
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                    <div id="quiz-feedback" aria-live="polite" class="hidden rounded-2xl p-4 text-sm"></div>
+                </div>
+            </div>
+            <p class="text-center text-[11px] text-slate-500">Type, ability, and stat data is retrieved from PokéAPI. Some questions require an internet connection.</p>
+        </div>
+    </section>
+
+    <!-- Pokédex Entry Inspector Modal -->
+    <div id="dex-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-slate-950 border border-amber-400/40 rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-5 py-3.5 border-b border-slate-800/90 flex items-center justify-between gap-2 bg-slate-900/60">
+                <div class="flex items-center gap-2">
+                    <button id="dex-prev-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">← Prev</button>
+                    <button id="dex-next-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">Next →</button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="dex-shiny-toggle" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center gap-1.5">
+                        <span>✨</span>
+                        <span id="dex-shiny-label">Shiny: OFF</span>
+                    </button>
+                    <button id="dex-close-modal" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 flex items-center justify-center text-slate-300 transition">✕</button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div id="dex-modal-body" class="flex-1 overflow-y-auto custom-scroll p-5 sm:p-6 space-y-5">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Encyclopedia Drawer (Tree Mode) -->
+    <aside id="detail-panel" class="fixed inset-y-0 right-0 w-full sm:w-[440px] bg-slate-950/95 backdrop-blur-xl border-l border-amber-400/35 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span id="detail-dex" class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">#0493</span>
+                <span id="detail-cat-badge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30">Mythical</span>
+            </div>
+            <button id="close-detail" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 flex items-center justify-center text-slate-300 transition">✕</button>
+        </div>
+
+        <div id="detail-content" class="flex-1 overflow-y-auto custom-scroll p-5 space-y-5">
+            <!-- Populated dynamically -->
+        </div>
+    </aside>
+
+    <!-- Navigation Hint Toast -->
+    <div id="hint-toast" class="fixed top-28 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-amber-400/40 text-amber-100 text-xs px-4 py-2 rounded-full shadow-xl pointer-events-none transition-opacity duration-500">
+        Drag to pan • Scroll or pinch to zoom • Click any Pokémon to explore its mythological lore
+    </div>
+
+    <script>
+        /**
+         * COMPLETE POKÉMON MYTHOLOGY & GENEALOGY DATABASE (GEN 1 - GEN 9)
+         * Includes EVERY Legendary, EVERY Mythical, and EVERY Ultra Beast.
+         * Canvas Dimensions: 4800 x 3300 px
+         */
+        const REGIONS = [
+            { id: 'all', label: 'Entire Tree', focus: { x: 2400, y: 1550, zoom: 0.34 } },
+            {
+                id: 'sinnoh',
+                label: 'Cosmic & Sinnoh',
+                box: { x: 1320, y: 240, w: 2160, h: 490, color: '#facc15', title: 'COSMIC ORIGIN & SINNOH — DIMENSIONS, SPIRIT & DREAMS' },
+                focus: { x: 2400, y: 410, zoom: 0.72 }
+            },
+            {
+                id: 'regis',
+                label: 'The Regis',
+                box: { x: 140, y: 800, w: 800, h: 360, color: '#d97706', title: 'THE REGIS — ANCIENT CONTINENTAL GOLEMS' },
+                focus: { x: 540, y: 980, zoom: 0.92 }
+            },
+            {
+                id: 'kanto',
+                label: 'Kanto',
+                box: { x: 990, y: 800, w: 660, h: 360, color: '#f472b6', title: 'KANTO — GENETIC ORIGIN & ELEMENTAL TITANS' },
+                focus: { x: 1320, y: 980, zoom: 0.92 }
+            },
+            {
+                id: 'johto',
+                label: 'Johto',
+                box: { x: 1700, y: 800, w: 820, h: 360, color: '#fbbf24', title: 'JOHTO — TOWER GUARDIANS & TIME FOREST' },
+                focus: { x: 2110, y: 980, zoom: 0.9 }
+            },
+            {
+                id: 'hoenn',
+                label: 'Hoenn',
+                box: { x: 2570, y: 800, w: 1040, h: 360, color: '#38bdf8', title: 'HOENN — SUPER-ANCIENT WEATHER & COSMIC WISHES' },
+                focus: { x: 3090, y: 980, zoom: 0.85 }
+            },
+            {
+                id: 'kalos',
+                label: 'Kalos',
+                box: { x: 3660, y: 800, w: 980, h: 360, color: '#f43f5e', title: 'KALOS — LIFE, DESTRUCTION & ECOSYSTEM ORDER' },
+                focus: { x: 4150, y: 980, zoom: 0.86 }
+            },
+            {
+                id: 'unova',
+                label: 'Unova',
+                box: { x: 140, y: 1240, w: 1920, h: 520, color: '#a78bfa', title: 'UNOVA — TAO DRAGONS, SWORDS OF JUSTICE & FORCES OF NATURE' },
+                focus: { x: 1100, y: 1500, zoom: 0.72 }
+            },
+            {
+                id: 'alola',
+                label: 'Alola',
+                box: { x: 2120, y: 1240, w: 2520, h: 520, color: '#facc15', title: 'ALOLA — LIGHT OF COSMOS, ISLAND GUARDIANS & ARTIFICIAL MYTHS' },
+                focus: { x: 3380, y: 1500, zoom: 0.68 }
+            },
+            {
+                id: 'ultrabeasts',
+                label: 'Ultra Space (UBs)',
+                box: { x: 140, y: 1840, w: 2360, h: 480, color: '#c084fc', title: 'ULTRA SPACE — EXTRADIMENSIONAL ULTRA BEASTS' },
+                focus: { x: 1320, y: 2080, zoom: 0.7 }
+            },
+            {
+                id: 'galar',
+                label: 'Galar',
+                box: { x: 2560, y: 1840, w: 2080, h: 480, color: '#60a5fa', title: 'GALAR & CROWN TUNDRA — HEROES, DARKEST DAY & HARVEST KING' },
+                focus: { x: 3600, y: 2080, zoom: 0.7 }
+            },
+            {
+                id: 'paldea',
+                label: 'Paldea & Kitakami',
+                box: { x: 640, y: 2400, w: 3520, h: 520, color: '#2dd4bf', title: 'PALDEA, AREA ZERO & KITAKAMI — TERA PARADOX, RUIN & LOYAL THREE' },
+                focus: { x: 2400, y: 2660, zoom: 0.66 }
+            }
+        ];
+
+        const POKEMON_DATA = [
+            // ==========================================
+            // 1. COSMIC ORIGIN & SINNOH (GEN 4)
+            // ==========================================
+            {
+                id: 'arceus', dex: 493, name: 'ARCEUS', role: 'The Original One',
+                category: 'Mythical', region: 'sinnoh', x: 2400, y: 120, ring: '#facc15', supreme: true,
+                types: ['Normal'],
+                lore: 'According to Sinnoh mythology, Arceus emerged from an egg in a vortex of pure chaos before time and space existed. With its thousand arms, it shaped the cosmos and birthed the Creation Trio and Lake Guardians.'
+            },
+            {
+                id: 'dialga', dex: 483, name: 'DIALGA', role: 'Master of Time',
+                category: 'Legendary', region: 'sinnoh', x: 1700, y: 380, ring: '#60a5fa',
+                types: ['Steel', 'Dragon'],
+                lore: 'Created directly by Arceus to govern the flow of time. Time began moving forward the instant Dialga was born, allowing the universe to evolve.'
+            },
+            {
+                id: 'palkia', dex: 484, name: 'PALKIA', role: 'Master of Space',
+                category: 'Legendary', region: 'sinnoh', x: 1980, y: 380, ring: '#f472b6',
+                types: ['Water', 'Dragon'],
+                lore: 'Twin counterpart to Dialga, empowered by Arceus to govern space and parallel dimensions. Its every breath stabilizes the fabric of reality.'
+            },
+            {
+                id: 'giratina', dex: 487, name: 'GIRATINA', role: 'Lord of Antimatter',
+                category: 'Legendary', region: 'sinnoh', x: 2260, y: 380, ring: '#f87171',
+                types: ['Ghost', 'Dragon'],
+                lore: 'The third member of the Creation Trio. Banished by Arceus to the Distortion World for its violent nature, where it silently maintains cosmic equilibrium.'
+            },
+            {
+                id: 'uxie', dex: 480, name: 'UXIE', role: 'Being of Knowledge',
+                category: 'Legendary', region: 'sinnoh', x: 2540, y: 380, ring: '#facc15',
+                types: ['Psychic'],
+                lore: 'Born from the same primordial egg as Mesprit and Azelf. Uxie gifted living beings intelligence and the wisdom to solve problems.'
+            },
+            {
+                id: 'mesprit', dex: 481, name: 'MESPRIT', role: 'Being of Emotion',
+                category: 'Legendary', region: 'sinnoh', x: 2820, y: 380, ring: '#f472b6',
+                types: ['Psychic'],
+                lore: 'Guardian of Lake Verity. Mesprit taught humanity the nobility of sorrow, pain, joy, and empathy.'
+            },
+            {
+                id: 'azelf', dex: 482, name: 'AZELF', role: 'Being of Willpower',
+                category: 'Legendary', region: 'sinnoh', x: 3100, y: 380, ring: '#38bdf8',
+                types: ['Psychic'],
+                lore: 'Guardian of Lake Valor. Azelf instilled in living creatures the determination and courage needed to overcome adversity.'
+            },
+            // Row 2 of Sinnoh
+            {
+                id: 'heatran', dex: 485, name: 'HEATRAN', role: 'Lava Dome Guardian',
+                category: 'Legendary', region: 'sinnoh', x: 1520, y: 600, ring: '#f97316',
+                types: ['Fire', 'Steel'],
+                lore: 'Born from boiling magma when Mt. Coronet was formed by Arceus’s creation of Sinnoh. Its blood boils like molten lava inside its rugged steel frame.'
+            },
+            {
+                id: 'cresselia', dex: 488, name: 'CRESSELIA', role: 'Lunar Swan',
+                category: 'Legendary', region: 'sinnoh', x: 1860, y: 600, ring: '#f472b6',
+                types: ['Psychic'],
+                lore: 'Represents the crescent moon and dispels nightmares induced by Darkrai. Holding one of its feathers brings blissful, peaceful dreams.'
+            },
+            {
+                id: 'darkrai', dex: 491, name: 'DARKRAI', role: 'Pitch-Black Nightmare',
+                category: 'Mythical', region: 'sinnoh', x: 2200, y: 600, ring: '#a855f7',
+                types: ['Dark'],
+                lore: 'Lunar counterpart to Cresselia. To protect itself, Darkrai projects terrifying nightmares into the minds of nearby humans and Pokémon.'
+            },
+            {
+                id: 'manaphy', dex: 490, name: 'MANAPHY', role: 'Prince of the Sea',
+                category: 'Mythical', region: 'sinnoh', x: 2560, y: 600, ring: '#38bdf8',
+                types: ['Water'],
+                lore: 'Born on the cold seafloor with a wondrous power to bond hearts with any Pokémon. It swims thousands of miles back to its birthplace.'
+            },
+            {
+                id: 'phione', dex: 489, name: 'PHIONE', role: 'Sea Drifter',
+                category: 'Mythical', region: 'sinnoh', x: 2900, y: 600, ring: '#7dd3fc',
+                types: ['Water'],
+                lore: 'Offspring born when Manaphy breeds with Ditto in warm seas. Though closely related to Manaphy, Phione never evolves into it.'
+            },
+            {
+                id: 'shaymin', dex: 492, name: 'SHAYMIN', role: 'Gratitude Bloom',
+                category: 'Mythical', region: 'sinnoh', x: 3260, y: 600, ring: '#4ade80',
+                types: ['Grass'],
+                lore: 'Dissolves toxins in the air to instantly transform ruined land into a lush field of Gracidea flowers whenever it senses genuine gratitude.'
+            },
+
+            // ==========================================
+            // 2. THE REGIS & ANCIENT GOLEMS
+            // ==========================================
+            {
+                id: 'regigigas', dex: 486, name: 'REGIGIGAS', role: 'Colossal Continent Mover',
+                category: 'Legendary', region: 'regis', x: 540, y: 890, ring: '#facc15',
+                types: ['Normal'],
+                lore: 'An enduring legend states that Regigigas towed the continents with ropes before sculpting five elemental golems out of rock, ice, magma, lightning, and dragon energy.'
+            },
+            {
+                id: 'regirock', dex: 377, name: 'REGIROCK', role: 'Rock Peak Golem',
+                category: 'Legendary', region: 'regis', x: 240, y: 1065, ring: '#d97706',
+                types: ['Rock'],
+                lore: 'Sculpted by Regigigas from solid boulders. When damaged in battle, it searches for matching stones to repair itself.'
+            },
+            {
+                id: 'regice', dex: 378, name: 'REGICE', role: 'Iceberg Golem',
+                category: 'Legendary', region: 'regis', x: 390, y: 1065, ring: '#7dd3fc',
+                types: ['Ice'],
+                lore: 'Formed by Regigigas during an ice age. Its body is cloaked in -328°F air that never melts even when submerged in magma.'
+            },
+            {
+                id: 'registeel', dex: 379, name: 'REGISTEEL', role: 'Iron Golem',
+                category: 'Legendary', region: 'regis', x: 540, y: 1065, ring: '#94a3b8',
+                types: ['Steel'],
+                lore: 'Tempered underground for tens of thousands of years by Regigigas, resulting in a hollow metal shell harder than any known alloy.'
+            },
+            {
+                id: 'regieleki', dex: 894, name: 'REGIELEKI', role: 'Electron Golem',
+                category: 'Legendary', region: 'regis', x: 690, y: 1065, ring: '#facc15',
+                types: ['Electric'],
+                lore: 'Created by Regigigas from pure, concentrated electric energy. Ancient people bound it with insulating rings to contain its power.'
+            },
+            {
+                id: 'regidrago', dex: 895, name: 'REGIDRAGO', role: 'Dragon Orb Golem',
+                category: 'Legendary', region: 'regis', x: 840, y: 1065, ring: '#f43f5e',
+                types: ['Dragon'],
+                lore: 'Composed of crystallized dragon energy. Legend says Regigigas ran out of crystals and could only finish the dragon’s head and arms.'
+            },
+
+            // ==========================================
+            // 3. KANTO (GEN 1)
+            // ==========================================
+            {
+                id: 'mew', dex: 151, name: 'MEW', role: 'Ancestor of All Pokémon',
+                category: 'Mythical', region: 'kanto', x: 1150, y: 890, ring: '#f472b6',
+                types: ['Psychic'],
+                lore: 'Said to possess the genetic composition of every Pokémon species. Scientists believe Mew is the evolutionary ancestor of all non-cosmic Pokémon.'
+            },
+            {
+                id: 'mewtwo', dex: 150, name: 'MEWTWO', role: 'Genetic Clone',
+                category: 'Legendary', region: 'kanto', x: 1150, y: 1065, ring: '#e879f9',
+                types: ['Psychic'],
+                lore: 'Created in the Pokémon Mansion on Cinnabar Island after years of horrific gene-splicing experiments on a fossilized eyelash of Mew.'
+            },
+            {
+                id: 'articuno', dex: 144, name: 'ARTICUNO', role: 'Titan of Ice',
+                category: 'Legendary', region: 'kanto', x: 1340, y: 1065, ring: '#7dd3fc',
+                types: ['Ice', 'Flying'],
+                lore: 'One of the three Legendary Birds of Kanto’s Seafoam and Shamouti Islands. Its clashes with Zapdos and Moltres can only be calmed by Lugia.'
+            },
+            {
+                id: 'zapdos', dex: 145, name: 'ZAPDOS', role: 'Titan of Lightning',
+                category: 'Legendary', region: 'kanto', x: 1465, y: 1065, ring: '#facc15',
+                types: ['Electric', 'Flying'],
+                lore: 'Legendary Bird of Thunder whose wingbeats unleash devastating lightning storms unless pacified by Lugia’s song.'
+            },
+            {
+                id: 'moltres', dex: 146, name: 'MOLTRES', role: 'Titan of Fire',
+                category: 'Legendary', region: 'kanto', x: 1590, y: 1065, ring: '#f97316',
+                types: ['Fire', 'Flying'],
+                lore: 'Legendary Bird of Flame that brings early spring to wintry lands. Part of the elemental bird triad overseen by Lugia.'
+            },
+
+            // ==========================================
+            // 4. JOHTO (GEN 2)
+            // ==========================================
+            {
+                id: 'ho-oh', dex: 250, name: 'HO-OH', role: 'Rainbow Phoenix',
+                category: 'Legendary', region: 'johto', x: 1960, y: 890, ring: '#f59e0b',
+                types: ['Fire', 'Flying'],
+                lore: 'Guardian of the skies and Bell Tower. After lightning burned the Brass Tower, Ho-Oh resurrected three perished Pokémon as Raikou, Entei, and Suicune.'
+            },
+            {
+                id: 'lugia', dex: 249, name: 'LUGIA', role: 'Guardian of the Seas',
+                category: 'Legendary', region: 'johto', x: 2260, y: 890, ring: '#38bdf8',
+                types: ['Psychic', 'Flying'],
+                lore: 'Twin guardian to Ho-Oh who retreated to the ocean trenches so its fluttering wings wouldn’t cause 40-day storms. Master of the Kanto Legendary Birds.'
+            },
+            {
+                id: 'celebi', dex: 251, name: 'CELEBI', role: 'Voice of the Forest',
+                category: 'Mythical', region: 'johto', x: 2435, y: 890, ring: '#4ade80',
+                types: ['Psychic', 'Grass'],
+                lore: 'Guardian of Ilex Forest capable of wandering freely across time. Wherever Celebi appears, grass and trees flourish vibrantly.'
+            },
+            {
+                id: 'raikou', dex: 243, name: 'RAIKOU', role: 'Avatar of Lightning',
+                category: 'Legendary', region: 'johto', x: 1810, y: 1065, ring: '#facc15',
+                types: ['Electric'],
+                lore: 'One of the Legendary Beasts revived by Ho-Oh. Raikou embodies the bolt of lightning that struck the Brass Tower.'
+            },
+            {
+                id: 'entei', dex: 244, name: 'ENTEI', role: 'Avatar of Magma',
+                category: 'Legendary', region: 'johto', x: 1960, y: 1065, ring: '#ef4444',
+                types: ['Fire'],
+                lore: 'Legendary Beast reborn from the flames that consumed the Brass Tower. A new volcano is said to be born whenever it roars.'
+            },
+            {
+                id: 'suicune', dex: 245, name: 'SUICUNE', role: 'Avatar of North Winds',
+                category: 'Legendary', region: 'johto', x: 2110, y: 1065, ring: '#38bdf8',
+                types: ['Water'],
+                lore: 'Legendary Beast embodying the downpour that quenched the Brass Tower fire. It races across the world purifying tainted water.'
+            },
+
+            // ==========================================
+            // 5. HOENN (GEN 3)
+            // ==========================================
+            {
+                id: 'rayquaza', dex: 384, name: 'RAYQUAZA', role: 'Sky High Sovereign',
+                category: 'Legendary', region: 'hoenn', x: 2820, y: 890, ring: '#4ade80',
+                types: ['Dragon', 'Flying'],
+                lore: 'Dwelling in the ozone layer for hundreds of millions of years, Rayquaza descends to quell the cataclysmic battles between Groudon and Kyogre.'
+            },
+            {
+                id: 'kyogre', dex: 382, name: 'KYOGRE', role: 'Expander of Seas',
+                category: 'Legendary', region: 'hoenn', x: 2680, y: 1065, ring: '#3b82f6',
+                types: ['Water'],
+                lore: 'Primordial leviathan that expanded the oceans with torrential rains before clashing with Groudon until Rayquaza intervened.'
+            },
+            {
+                id: 'groudon', dex: 383, name: 'GROUDON', role: 'Raiser of Continents',
+                category: 'Legendary', region: 'hoenn', x: 2960, y: 1065, ring: '#ef4444',
+                types: ['Ground'],
+                lore: 'Primordial behemoth that evaporated floodwaters and raised the landmasses in eternal rivalry with Kyogre.'
+            },
+            {
+                id: 'latias', dex: 380, name: 'LATIAS', role: 'Eon Duo (Female)',
+                category: 'Legendary', region: 'hoenn', x: 3170, y: 890, ring: '#f43f5e',
+                types: ['Dragon', 'Psychic'],
+                lore: 'Highly intelligent dragon that refracts light with its glass-like down to turn invisible. Shares a telepathic bond with Latios.'
+            },
+            {
+                id: 'latios', dex: 381, name: 'LATIOS', role: 'Eon Duo (Male)',
+                category: 'Legendary', region: 'hoenn', x: 3170, y: 1065, ring: '#38bdf8',
+                types: ['Dragon', 'Psychic'],
+                lore: 'Brother counterpart to Latias, capable of sharing memories and images telepathically while flying faster than a jet plane.'
+            },
+            {
+                id: 'jirachi', dex: 385, name: 'JIRACHI', role: 'Millennium Wish Maker',
+                category: 'Mythical', region: 'hoenn', x: 3440, y: 890, ring: '#facc15',
+                types: ['Steel', 'Psychic'],
+                lore: 'Awakens for seven days once every thousand years when the Millennium Comet passes, granting wishes written on the tags on its head.'
+            },
+            {
+                id: 'deoxys', dex: 386, name: 'DEOXYS', role: 'Extraterrestrial DNA Virus',
+                category: 'Mythical', region: 'hoenn', x: 3440, y: 1065, ring: '#f97316',
+                types: ['Psychic'],
+                lore: 'An alien space virus exposed to a laser beam that mutated into a DNA Pokémon. Infamous for fierce territorial battles with Rayquaza.'
+            },
+
+            // ==========================================
+            // 6. KALOS (GEN 6)
+            // ==========================================
+            {
+                id: 'zygarde', dex: 718, name: 'ZYGARDE', role: 'Order & Ecosystem Monitor',
+                category: 'Legendary', region: 'kalos', x: 3930, y: 890, ring: '#4ade80',
+                types: ['Dragon', 'Ground'],
+                lore: 'Composed of countless cells scattered across Kalos. When Xerneas or Yveltal disrupts the ecosystem’s balance, Zygarde assembles to restore order.'
+            },
+            {
+                id: 'xerneas', dex: 716, name: 'XERNEAS', role: 'Bestower of Eternal Life',
+                category: 'Legendary', region: 'kalos', x: 3770, y: 1065, ring: '#38bdf8',
+                types: ['Fairy'],
+                lore: 'When the horns on its head shine in seven colors, it shares the blessing of eternal life before sleeping for a millennium as a tree.'
+            },
+            {
+                id: 'yveltal', dex: 717, name: 'YVELTAL', role: 'Harbinger of Destruction',
+                category: 'Legendary', region: 'kalos', x: 4090, y: 1065, ring: '#ef4444',
+                types: ['Dark', 'Flying'],
+                lore: 'When its lifespan reaches its end, it spreads its wings and absorbs the life energy of every living thing around it before becoming a cocoon.'
+            },
+            {
+                id: 'diancie', dex: 719, name: 'DIANCIE', role: 'Jewel Princess',
+                category: 'Mythical', region: 'kalos', x: 4320, y: 890, ring: '#f472b6',
+                types: ['Rock', 'Fairy'],
+                lore: 'A sudden, miraculous mutation of Carbink. Ruler of the Diamond Domain, capable of compressing carbon in the air into flawless pink diamonds.'
+            },
+            {
+                id: 'hoopa', dex: 720, name: 'HOOPA', role: 'Mischief Ring Djinn',
+                category: 'Mythical', region: 'kalos', x: 4520, y: 890, ring: '#c084fc',
+                types: ['Psychic', 'Ghost'],
+                lore: 'Uses its dimensional rings to warp objects, islands, and even other Legendary Pokémon across space at will.'
+            },
+            {
+                id: 'volcanion', dex: 721, name: 'VOLCANION', role: 'Steam Geyser Titan',
+                category: 'Mythical', region: 'kalos', x: 4420, y: 1065, ring: '#f97316',
+                types: ['Fire', 'Water'],
+                lore: 'The only Fire/Water Pokémon. It expels superheated steam from its ring-shaped arms with enough force to blow away mountains.'
+            },
+
+            // ==========================================
+            // 7. UNOVA & HISUI FORCE (GEN 5)
+            // ==========================================
+            // Tao Trio
+            {
+                id: 'reshiram', dex: 643, name: 'RESHIRAM', role: 'Dragon of Truth (Yang)',
+                category: 'Legendary', region: 'unova', x: 280, y: 1370, ring: '#f8fafc',
+                types: ['Dragon', 'Fire'],
+                lore: 'Born when the Original Dragon of Unova split in two over a dispute between twin heroes: Reshiram sided with the elder brother who sought Truth.'
+            },
+            {
+                id: 'zekrom', dex: 644, name: 'ZEKROM', role: 'Dragon of Ideals (Yin)',
+                category: 'Legendary', region: 'unova', x: 640, y: 1370, ring: '#6366f1',
+                types: ['Dragon', 'Electric'],
+                lore: 'The other half of the Original Dragon of Unova, siding with the younger hero who pursued noble Ideals.'
+            },
+            {
+                id: 'kyurem', dex: 646, name: 'KYUREM', role: 'Empty Boundary Shell (Wu Ji)',
+                category: 'Legendary', region: 'unova', x: 460, y: 1620, ring: '#7dd3fc',
+                types: ['Dragon', 'Ice'],
+                lore: 'The icy remnant left behind when Reshiram and Zekrom split from the Original Dragon. It awaits a hero to fuse its missing halves back together.'
+            },
+            // Swords of Justice
+            {
+                id: 'cobalion', dex: 638, name: 'COBALION', role: 'Leader of the Swords',
+                category: 'Legendary', region: 'unova', x: 860, y: 1370, ring: '#38bdf8',
+                types: ['Steel', 'Fighting'],
+                lore: 'Stoic leader of the Swords of Justice who fought against humans to protect wild Pokémon during ancient wars.'
+            },
+            {
+                id: 'terrakion', dex: 639, name: 'TERRAKION', role: 'Brawn of the Swords',
+                category: 'Legendary', region: 'unova', x: 1030, y: 1370, ring: '#d97706',
+                types: ['Rock', 'Fighting'],
+                lore: 'Possesses phenomenal strength capable of shattering castle walls. Alongside Cobalion and Virizion, it mentored young Keldeo.'
+            },
+            {
+                id: 'virizion', dex: 640, name: 'VIRIZION', role: 'Swiftness of the Swords',
+                category: 'Legendary', region: 'unova', x: 1200, y: 1370, ring: '#4ade80',
+                types: ['Grass', 'Fighting'],
+                lore: 'Darts around foes with blinding speed and razor-sharp horns to defend its companions.'
+            },
+            {
+                id: 'keldeo', dex: 647, name: 'KELDEO', role: 'Apprentice Colt',
+                category: 'Mythical', region: 'unova', x: 1030, y: 1620, ring: '#38bdf8',
+                types: ['Water', 'Fighting'],
+                lore: 'Orphaned during a forest fire and raised by Cobalion, Terrakion, and Virizion to master the Secret Sword.'
+            },
+            // Forces of Nature
+            {
+                id: 'tornadus', dex: 641, name: 'TORNADUS', role: 'Cyclone Kami',
+                category: 'Legendary', region: 'unova', x: 1410, y: 1370, ring: '#4ade80',
+                types: ['Flying'],
+                lore: 'Member of the Forces of Nature whose lower body is wrapped in an energy cloud, whipping up 200 mph windstorms.'
+            },
+            {
+                id: 'thundurus', dex: 642, name: 'THUNDURUS', role: 'Bolt Strike Kami',
+                category: 'Legendary', region: 'unova', x: 1580, y: 1370, ring: '#38bdf8',
+                types: ['Electric', 'Flying'],
+                lore: 'Fires bolts of lightning from the spikes on its tail, leaving scorched lands behind until calmed by Landorus.'
+            },
+            {
+                id: 'landorus', dex: 645, name: 'LANDORUS', role: 'Abundance Guardian',
+                category: 'Legendary', region: 'unova', x: 1495, y: 1620, ring: '#f59e0b',
+                types: ['Ground', 'Flying'],
+                lore: 'Guardian of the fields who punishes Tornadus and Thundurus for their destruction and enriches the soil for bountiful harvests.'
+            },
+            {
+                id: 'enamorus', dex: 905, name: 'ENAMORUS', role: 'Herald of Spring (Hisui)',
+                category: 'Legendary', region: 'unova', x: 1680, y: 1620, ring: '#f472b6',
+                types: ['Fairy', 'Flying'],
+                lore: 'The fourth Force of Nature discovered in ancient Hisui. Flying in from across the sea, its arrival brings an end to bitter winters.'
+            },
+            // Unova Mythicals
+            {
+                id: 'victini', dex: 494, name: 'VICTINI', role: 'Victory Star',
+                category: 'Mythical', region: 'unova', x: 1890, y: 1330, ring: '#f97316',
+                types: ['Psychic', 'Fire'],
+                lore: 'Generates infinite energy within its body. Legend proclaims that any Trainer who befriends Victini will always achieve victory.'
+            },
+            {
+                id: 'meloetta', dex: 648, name: 'MELOETTA', role: 'Melody & Dance Muse',
+                category: 'Mythical', region: 'unova', x: 1890, y: 1485, ring: '#4ade80',
+                types: ['Normal', 'Psychic'],
+                lore: 'Its enchanting melodies inspired countless famous songs and symphonies across the world.'
+            },
+            {
+                id: 'genesect', dex: 649, name: 'GENESECT', role: 'Restored Paleo-Cyborg',
+                category: 'Mythical', region: 'unova', x: 1890, y: 1640, ring: '#a855f7',
+                types: ['Bug', 'Steel'],
+                lore: 'An apex insectoid predator from 300 million years ago revived from a fossil and cybernetically upgraded with a cannon by Team Plasma.'
+            },
+
+            // ==========================================
+            // 8. ALOLA (GEN 7)
+            // ==========================================
+            // Light Trio & Cosmog Line
+            {
+                id: 'necrozma', dex: 800, name: 'NECROZMA', role: 'The Blinding One',
+                category: 'Legendary', region: 'alola', x: 2450, y: 1340, ring: '#c084fc',
+                types: ['Psychic'],
+                lore: 'An ancient creature from Ultra Space that once radiated dazzling light across dimensions before losing its prism body and craving the light of Solgaleo and Lunala.'
+            },
+            {
+                id: 'cosmog', dex: 789, name: 'COSMOG', role: 'Nebula Child',
+                category: 'Legendary', region: 'alola', x: 2240, y: 1490, ring: '#60a5fa',
+                types: ['Psychic'],
+                lore: 'A fragile, curious Pokémon formed from stardust in Ultra Space, known in ancient Alola as the "Child of the Stars".'
+            },
+            {
+                id: 'cosmoem', dex: 790, name: 'COSMOEM', role: 'Protostar Cocoon',
+                category: 'Legendary', region: 'alola', x: 2450, y: 1490, ring: '#818cf8',
+                types: ['Psychic'],
+                lore: 'The motionless, super-dense cocoon stage of Cosmog that absorbs starlight as it prepares to evolve into Solgaleo or Lunala.'
+            },
+            {
+                id: 'solgaleo', dex: 791, name: 'SOLGALEO', role: 'Emissary of the Sun',
+                category: 'Legendary', region: 'alola', x: 2260, y: 1655, ring: '#f59e0b',
+                types: ['Psychic', 'Steel'],
+                lore: 'The male-associated evolution of Cosmoem, revered since ancient times as "The Beast That Devours the Sun".'
+            },
+            {
+                id: 'lunala', dex: 792, name: 'LUNALA', role: 'Emissary of the Moon',
+                category: 'Legendary', region: 'alola', x: 2640, y: 1655, ring: '#818cf8',
+                types: ['Psychic', 'Ghost'],
+                lore: 'The female-associated evolution of Cosmoem, honored as "The Beast That Calls the Moon".'
+            },
+            // Tapus (Island Guardians)
+            {
+                id: 'tapu-koko', dex: 785, name: 'TAPU KOKO', role: 'Guardian of Melemele',
+                category: 'Legendary', region: 'alola', x: 2940, y: 1370, ring: '#facc15',
+                types: ['Electric', 'Fairy'],
+                lore: 'Guardian deity of Melemele Island who summons thunderclouds and loves testing promising Trainers in battle.'
+            },
+            {
+                id: 'tapu-lele', dex: 786, name: 'TAPU LELE', role: 'Guardian of Akala',
+                category: 'Legendary', region: 'alola', x: 3150, y: 1370, ring: '#f472b6',
+                types: ['Psychic', 'Fairy'],
+                lore: 'Guardian deity of Akala Island that scatters glowing scales capable of healing wounds—or overwhelming bodies with vitality.'
+            },
+            {
+                id: 'tapu-bulu', dex: 787, name: 'TAPU BULU', role: 'Guardian of Ula’ula',
+                category: 'Legendary', region: 'alola', x: 2940, y: 1620, ring: '#ef4444',
+                types: ['Grass', 'Fairy'],
+                lore: 'Guardian deity of Ula’ula Island that controls vegetation and can uproot massive trees with ease.'
+            },
+            {
+                id: 'tapu-fini', dex: 788, name: 'TAPU FINI', role: 'Guardian of Poni',
+                category: 'Legendary', region: 'alola', x: 3150, y: 1620, ring: '#38bdf8',
+                types: ['Water', 'Fairy'],
+                lore: 'Guardian deity of Poni Island that creates thick fog to purify both body and mind.'
+            },
+            // Artificial Beast Killers
+            {
+                id: 'type-null', dex: 772, name: 'TYPE: NULL', role: 'Synthetic Chimera',
+                category: 'Legendary', region: 'alola', x: 3440, y: 1370, ring: '#94a3b8',
+                types: ['Normal'],
+                lore: 'Engineered by the Aether Foundation using cells from every Pokémon type to combat Ultra Beasts, fitted with a heavy control mask.'
+            },
+            {
+                id: 'silvally', dex: 773, name: 'SILVALLY', role: 'RKS System Awakened',
+                category: 'Legendary', region: 'alola', x: 3440, y: 1620, ring: '#f8fafc',
+                types: ['Normal'],
+                lore: 'When Type: Null forms a deep bond with a Trainer, it shatters its control mask and unlocks the RKS System to change types via memories.'
+            },
+            // Alola Mythicals
+            {
+                id: 'magearna', dex: 801, name: 'MAGEARNA', role: 'Soul-Heart Automaton',
+                category: 'Mythical', region: 'alola', x: 3730, y: 1370, ring: '#f472b6',
+                types: ['Steel', 'Fairy'],
+                lore: 'A mechanical Pokémon crafted 500 years ago by a genius scientist. Its true life force resides in the mystical Soul-Heart in its chest.'
+            },
+            {
+                id: 'marshadow', dex: 802, name: 'MARSHADOW', role: 'Gloomdweller Martial Artist',
+                category: 'Mythical', region: 'alola', x: 3930, y: 1370, ring: '#6366f1',
+                types: ['Fighting', 'Ghost'],
+                lore: 'Slips into the shadows of martial arts masters to copy their movements and ultimately surpass their skill.'
+            },
+            {
+                id: 'zeraora', dex: 807, name: 'ZERAORA', role: 'Thunderclap Myth',
+                category: 'Mythical', region: 'alola', x: 3730, y: 1620, ring: '#facc15',
+                types: ['Electric'],
+                lore: 'Creates a powerful magnetic field with electric currents in its pads, allowing it to levitate and strike as fast as lightning.'
+            },
+            {
+                id: 'meltan', dex: 808, name: 'MELTAN', role: 'Hex Nut Liquid Metal',
+                category: 'Mythical', region: 'alola', x: 4160, y: 1370, ring: '#94a3b8',
+                types: ['Steel'],
+                lore: 'Ancient liquid-metal Pokémon that corrodes and absorbs iron to generate electricity.'
+            },
+            {
+                id: 'melmetal', dex: 809, name: 'MELMETAL', role: 'Colossal Amalgam',
+                category: 'Mythical', region: 'alola', x: 4160, y: 1620, ring: '#f59e0b',
+                types: ['Steel'],
+                lore: 'Revived after 3,000 years when numerous Meltan fuse together, wielding the strongest iron-powered punches of any Pokémon.'
+            },
+
+            // ==========================================
+            // 9. ULTRA BEASTS (ULTRA SPACE)
+            // ==========================================
+            {
+                id: 'nihilego', dex: 793, name: 'NIHILEGO', role: 'UB-01 Symbiont',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 280, y: 1975, ring: '#e879f9',
+                types: ['Rock', 'Poison'],
+                lore: 'A glass-like parasite from the Ultra Deep Sea that injects neurotoxins to hijack a host’s emotions and unlock latent power.'
+            },
+            {
+                id: 'buzzwole', dex: 794, name: 'BUZZWOLE', role: 'UB-02 Absorption',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 520, y: 1975, ring: '#ef4444',
+                types: ['Bug', 'Fighting'],
+                lore: 'Hails from the Ultra Jungle. It drains energy with its needle-like mouth, causing its muscles to swell to absurd proportions.'
+            },
+            {
+                id: 'pheromosa', dex: 795, name: 'PHEROMOSA', role: 'UB-02 Beauty',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 760, y: 1975, ring: '#f8fafc',
+                types: ['Bug', 'Fighting'],
+                lore: 'From the Ultra Desert. It moves at supersonic speeds and exudes a pheromone that causes any creature nearby to lose the will to fight.'
+            },
+            {
+                id: 'xurkitree', dex: 796, name: 'XURKITREE', role: 'UB-03 Lighting',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 1000, y: 1975, ring: '#facc15',
+                types: ['Electric'],
+                lore: 'From the Ultra Plant. Resembling tangled electrical cables, it plugs its limbs into the earth to drain massive amounts of electricity.'
+            },
+            {
+                id: 'celesteela', dex: 797, name: 'CELESTEELA', role: 'UB-04 Blaster',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 1240, y: 1975, ring: '#4ade80',
+                types: ['Steel', 'Flying'],
+                lore: 'From the Ultra Crater. A towering bamboo-rocket Ultra Beast that blasts flammable gas from its twin arms to soar into space.'
+            },
+            {
+                id: 'kartana', dex: 798, name: 'KARTANA', role: 'UB-04 Blade',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 1480, y: 1975, ring: '#f97316',
+                types: ['Grass', 'Steel'],
+                lore: 'From the Ultra Forest. Though thin as origami paper, every edge of its body is sharper than a master-forged katana.'
+            },
+            {
+                id: 'guzzlord', dex: 799, name: 'GUZZLORD', role: 'UB-05 Glutton',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 1720, y: 1975, ring: '#818cf8',
+                types: ['Dark', 'Dragon'],
+                lore: 'From the Ultra Ruin. A bottomless abyssal maw that devours mountains, buildings, and oceans without ever leaving waste.'
+            },
+            {
+                id: 'poipole', dex: 803, name: 'POIPOLE', role: 'UB Adhesive',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 2020, y: 1950, ring: '#c084fc',
+                types: ['Poison'],
+                lore: 'In its home dimension of Ultra Megalopolis, Poipole is popular enough to be chosen as a first partner Pokémon.'
+            },
+            {
+                id: 'naganadel', dex: 804, name: 'NAGANADEL', role: 'UB Stinger',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 2020, y: 2185, ring: '#a855f7',
+                types: ['Poison', 'Dragon'],
+                lore: 'Evolved form of Poipole upon learning Dragon Pulse. Its abdomen stores hundreds of liters of glowing, adhesive venom.'
+            },
+            {
+                id: 'stakataka', dex: 805, name: 'STAKATAKA', role: 'UB Assembly',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 2300, y: 1950, ring: '#94a3b8',
+                types: ['Rock', 'Steel'],
+                lore: 'Not a single organism, but a colony of roughly 150 individual stone life-forms stacked together into a living fortress.'
+            },
+            {
+                id: 'blacephalon', dex: 806, name: 'BLACEPHALON', role: 'UB Burst',
+                category: 'Ultra Beast', region: 'ultrabeasts', x: 2300, y: 2185, ring: '#f43f5e',
+                types: ['Fire', 'Ghost'],
+                lore: 'A flamboyant clown-like Ultra Beast that detaches and detonates its own spark-filled head to dazzle and drain vitality from foes.'
+            },
+
+            // ==========================================
+            // 10. GALAR & CROWN TUNDRA (GEN 8)
+            // ==========================================
+            {
+                id: 'eternatus', dex: 890, name: 'ETERNATUS', role: 'The Darkest Day Core',
+                category: 'Legendary', region: 'galar', x: 2920, y: 1950, ring: '#e11d48',
+                types: ['Poison', 'Dragon'],
+                lore: 'Fell to Earth inside a meteorite 20,000 years ago. The core in its chest leaks Galar particles that trigger the Dynamax phenomenon.'
+            },
+            {
+                id: 'zacian', dex: 888, name: 'ZACIAN', role: 'Crowned Sword Hero',
+                category: 'Legendary', region: 'galar', x: 2740, y: 2185, ring: '#38bdf8',
+                types: ['Fairy', 'Steel'],
+                lore: 'Known as the Fairy King’s Sword, Zacian fought alongside Zamazenta and ancient kings to halt Eternatus during the Darkest Day.'
+            },
+            {
+                id: 'zamazenta', dex: 889, name: 'ZAMAZENTA', role: 'Crowned Shield Hero',
+                category: 'Legendary', region: 'galar', x: 3100, y: 2185, ring: '#f43f5e',
+                types: ['Fighting', 'Steel'],
+                lore: 'Known as the Fighting Master’s Shield, Zamazenta deflected Eternatus’s cataclysmic attacks to save the Galar region.'
+            },
+            // Galarian Birds
+            {
+                id: 'galar-articuno', dex: 144, spriteId: 10169, name: 'GALARIAN ARTICUNO', role: 'Cruel Psychic Bird',
+                category: 'Legendary', region: 'galar', x: 3340, y: 1950, ring: '#c084fc',
+                types: ['Psychic', 'Flying'],
+                lore: 'A migratory bird of the Crown Tundra named after Articuno for its freezing psychic gaze that immobilizes prey like ice.'
+            },
+            {
+                id: 'galar-zapdos', dex: 145, spriteId: 10170, name: 'GALARIAN ZAPDOS', role: 'Strong-Legged Bird',
+                category: 'Legendary', region: 'galar', x: 3530, y: 1950, ring: '#f97316',
+                types: ['Fighting', 'Flying'],
+                lore: 'Named after Zapdos because the electric-like crackle of its feathers rubbing together sounds like thunder as it sprints down cliffs.'
+            },
+            {
+                id: 'galar-moltres', dex: 146, spriteId: 10171, name: 'GALARIAN MOLTRES', role: 'Malevolent Aura Bird',
+                category: 'Legendary', region: 'galar', x: 3720, y: 1950, ring: '#ef4444',
+                types: ['Dark', 'Flying'],
+                lore: 'Named after Moltres because the sinister, flame-like dark aura billowing from its wings resembles a raging inferno.'
+            },
+            // Kubfu & Urshifu
+            {
+                id: 'kubfu', dex: 891, name: 'KUBFU', role: 'Wushu Student',
+                category: 'Legendary', region: 'galar', x: 3420, y: 2185, ring: '#d97706',
+                types: ['Fighting'],
+                lore: 'Trains diligently in distant mountains, pulling its long white head hair to focus fighting energy in its lower abdomen.'
+            },
+            {
+                id: 'urshifu', dex: 892, name: 'URSHIFU', role: 'Master of One/Rapid Blows',
+                category: 'Legendary', region: 'galar', x: 3650, y: 2185, ring: '#f87171',
+                types: ['Fighting', 'Dark'],
+                lore: 'Evolved form of Kubfu after completing the Towers of Two Fists, mastering either Single Strike or Rapid Strike martial arts.'
+            },
+            // Calyrex & Steeds + Zarude
+            {
+                id: 'calyrex', dex: 898, name: 'CALYREX', role: 'King of Bountiful Harvests',
+                category: 'Legendary', region: 'galar', x: 4100, y: 1950, ring: '#4ade80',
+                types: ['Psychic', 'Grass'],
+                lore: 'A merciful ancient king who once ruled all of Galar and rides either Glastrier or Spectrier using the Reins of Unity.'
+            },
+            {
+                id: 'glastrier', dex: 896, name: 'GLASTRIER', role: 'Wild Frost Steed',
+                category: 'Legendary', region: 'galar', x: 3940, y: 2185, ring: '#7dd3fc',
+                types: ['Ice'],
+                lore: 'A belligerent ice horse of tremendous physical might that was tamed by King Calyrex in ancient times.'
+            },
+            {
+                id: 'spectrier', dex: 897, name: 'SPECTRIER', role: 'Swift Shadow Steed',
+                category: 'Legendary', region: 'galar', x: 4260, y: 2185, ring: '#a855f7',
+                types: ['Ghost'],
+                lore: 'A solitary phantom steed that absorbs the life force of sleeping creatures and gallops through the night.'
+            },
+            {
+                id: 'zarude', dex: 893, name: 'ZARUDE', role: 'Rogue Jungle Monkey',
+                category: 'Mythical', region: 'galar', x: 4480, y: 2065, ring: '#22c55e',
+                types: ['Dark', 'Grass'],
+                lore: 'Lives in tight-knit packs deep within dense jungles, sprouting healing vines from its neck, wrists, and soles.'
+            },
+
+            // ==========================================
+            // 11. PALDEA, AREA ZERO & KITAKAMI (GEN 9)
+            // ==========================================
+            {
+                id: 'terapagos', dex: 1024, name: 'TERAPAGOS', role: 'Origin of Terastallization',
+                category: 'Legendary', region: 'paldea', x: 1120, y: 2530, ring: '#2dd4bf',
+                types: ['Normal'],
+                lore: 'The ancient ruler of Area Zero beneath the Great Crater of Paldea. Its crystalline shell radiates Tera energy that powers time travel and Terastallization.'
+            },
+            {
+                id: 'koraidon', dex: 1007, name: 'KORAIDON', role: 'Winged King (Ancient Past)',
+                category: 'Legendary', region: 'paldea', x: 880, y: 2770, ring: '#ef4444',
+                types: ['Fighting', 'Dragon'],
+                lore: 'A prehistoric Paradox relative of Cyclizar pulled from the distant past by Professor Sada’s Tera-powered time machine.'
+            },
+            {
+                id: 'miraidon', dex: 1008, name: 'MIRAIDON', role: 'Iron Serpent (Distant Future)',
+                category: 'Legendary', region: 'paldea', x: 1360, y: 2770, ring: '#818cf8',
+                types: ['Electric', 'Dragon'],
+                lore: 'A futuristic Paradox descendant of Cyclizar brought from the distant future by Professor Turo’s time machine.'
+            },
+            // Treasures of Ruin
+            {
+                id: 'wo-chien', dex: 1001, name: 'WO-CHIEN', role: 'Tablets of Ruin',
+                category: 'Legendary', region: 'paldea', x: 1740, y: 2530, ring: '#4ade80',
+                types: ['Dark', 'Grass'],
+                lore: 'Born when the grudges of a historian executed for exposing a king’s evil deeds infused ancient wooden tablets and withered foliage.'
+            },
+            {
+                id: 'chien-pao', dex: 1002, name: 'CHIEN-PAO', role: 'Sword of Ruin',
+                category: 'Legendary', region: 'paldea', x: 2040, y: 2530, ring: '#7dd3fc',
+                types: ['Dark', 'Ice'],
+                lore: 'Born from the hatred of those slain by a cursed sword, cloaking the broken blade in snow and ice.'
+            },
+            {
+                id: 'ting-lu', dex: 1003, name: 'TING-LU', role: 'Vessel of Ruin',
+                category: 'Legendary', region: 'paldea', x: 1740, y: 2770, ring: '#d97706',
+                types: ['Dark', 'Ground'],
+                lore: 'A massive, terrifying deer-like calamity formed when ancient fear poured into a ritual bronze vessel.'
+            },
+            {
+                id: 'chi-yu', dex: 1004, name: 'CHI-YU', role: 'Beads of Ruin',
+                category: 'Legendary', region: 'paldea', x: 2040, y: 2770, ring: '#f97316',
+                types: ['Dark', 'Fire'],
+                lore: 'Animated by the envy of those who fought over four precious curved beads, burning at over 5,400°F.'
+            },
+            // Kitakami: Pecharunt, Loyal Three & Ogerpon
+            {
+                id: 'pecharunt', dex: 1025, name: 'PECHARUNT', role: 'Subjugation Peach Myth',
+                category: 'Mythical', region: 'paldea', x: 3020, y: 2520, ring: '#e879f9',
+                types: ['Poison', 'Ghost'],
+                lore: 'Feeds toxic, delicious Binding Mochi to humans and Pokémon to bend their wills—turning Okidogi, Munkidori, and Fezandipiti into its loyal retainers.'
+            },
+            {
+                id: 'ogerpon', dex: 1017, name: 'OGERPON', role: 'Teal Mask Oni',
+                category: 'Legendary', region: 'paldea', x: 3820, y: 2650, ring: '#2dd4bf',
+                types: ['Grass'],
+                lore: 'A gentle mask-wearing Pokémon from distant lands whose human friend was slain by Pecharunt’s Loyal Three while defending their Tera-infused masks.'
+            },
+            {
+                id: 'okidogi', dex: 1014, name: 'OKIDOGI', role: 'Subjugated Brute',
+                category: 'Legendary', region: 'paldea', x: 2680, y: 2770, ring: '#22c55e',
+                types: ['Poison', 'Fighting'],
+                lore: 'Once small and weak, it was granted massive brawn and a toxic chain by Pecharunt’s Binding Mochi.'
+            },
+            {
+                id: 'munkidori', dex: 1015, name: 'MUNKIDORI', role: 'Subjugated Schemer',
+                category: 'Legendary', region: 'paldea', x: 3020, y: 2770, ring: '#a855f7',
+                types: ['Poison', 'Psychic'],
+                lore: 'Gifted heightened psychic intellect by Pecharunt’s Binding Mochi, allowing it to manipulate foes from afar.'
+            },
+            {
+                id: 'fezandipiti', dex: 1016, name: 'FEZANDIPITI', role: 'Subjugated Charmer',
+                category: 'Legendary', region: 'paldea', x: 3360, y: 2770, ring: '#f472b6',
+                types: ['Poison', 'Fairy'],
+                lore: 'Blessed with enchanting beauty and alluring pheromones by Pecharunt’s Binding Mochi.'
+            }
+        ];
+
+        /**
+         * GENEALOGICAL & MYTHOLOGICAL CONNECTIONS
+         */
+        const CONNECTIONS = [
+            // Arceus -> Creation Trio & Lake Guardians (Orthogonal Cosmic Bus)
+            { from: 'arceus', to: 'dialga', type: 'created', style: 'ortho', busY: 215, arrow: true },
+            { from: 'arceus', to: 'palkia', type: 'created', style: 'ortho', busY: 215, arrow: true },
+            { from: 'arceus', to: 'giratina', type: 'created', style: 'ortho', busY: 215, arrow: true },
+            { from: 'arceus', to: 'uxie', type: 'created', style: 'ortho', busY: 215, arrow: true },
+            { from: 'arceus', to: 'mesprit', type: 'created', style: 'ortho', busY: 215, arrow: true },
+            { from: 'arceus', to: 'azelf', type: 'created', style: 'ortho', busY: 215, arrow: true },
+
+            // Sinnoh Internal Relationships
+            { from: 'dialga', to: 'palkia', type: 'related' },
+            { from: 'palkia', to: 'giratina', type: 'related' },
+            { from: 'uxie', to: 'mesprit', type: 'related' },
+            { from: 'mesprit', to: 'azelf', type: 'related' },
+            { from: 'dialga', to: 'heatran', type: 'created' },
+            { from: 'cresselia', to: 'darkrai', type: 'related' },
+            { from: 'manaphy', to: 'phione', type: 'created', arrow: true },
+
+            // Cosmic Branches to Regional Pillars
+            { from: 'arceus', to: 'regigigas', type: 'created', style: 'ortho', busY: 765, subtle: true },
+            { from: 'arceus', to: 'mew', type: 'created', style: 'ortho', busY: 765, subtle: true },
+            { from: 'arceus', to: 'ho-oh', type: 'created', style: 'ortho', busY: 765, subtle: true },
+            { from: 'arceus', to: 'lugia', type: 'created', style: 'ortho', busY: 765, subtle: true },
+            { from: 'arceus', to: 'rayquaza', type: 'created', style: 'ortho', busY: 765, subtle: true },
+            { from: 'arceus', to: 'zygarde', type: 'created', style: 'ortho', busY: 765, subtle: true },
+
+            // The Regis
+            { from: 'regigigas', to: 'regirock', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'regigigas', to: 'regice', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'regigigas', to: 'registeel', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'regigigas', to: 'regieleki', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'regigigas', to: 'regidrago', type: 'created', style: 'ortho', busY: 975, arrow: true },
+
+            // Kanto & Johto
+            { from: 'mew', to: 'mewtwo', type: 'cloned', arrow: true },
+            { from: 'ho-oh', to: 'lugia', type: 'related' },
+            { from: 'ho-oh', to: 'raikou', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'ho-oh', to: 'entei', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'ho-oh', to: 'suicune', type: 'created', style: 'ortho', busY: 975, arrow: true },
+            { from: 'lugia', to: 'articuno', type: 'controls', style: 'ortho', busY: 975, arrow: true },
+            { from: 'lugia', to: 'zapdos', type: 'controls', style: 'ortho', busY: 975, arrow: true },
+            { from: 'lugia', to: 'moltres', type: 'controls', style: 'ortho', busY: 975, arrow: true },
+            { from: 'articuno', to: 'zapdos', type: 'related' },
+            { from: 'zapdos', to: 'moltres', type: 'related' },
+
+            // Hoenn
+            { from: 'rayquaza', to: 'kyogre', type: 'controls', arrow: true },
+            { from: 'rayquaza', to: 'groudon', type: 'controls', arrow: true },
+            { from: 'kyogre', to: 'groudon', type: 'related' },
+            { from: 'latias', to: 'latios', type: 'related' },
+            { from: 'rayquaza', to: 'deoxys', type: 'related' },
+
+            // Kalos
+            { from: 'zygarde', to: 'xerneas', type: 'controls', arrow: true },
+            { from: 'zygarde', to: 'yveltal', type: 'controls', arrow: true },
+            { from: 'xerneas', to: 'yveltal', type: 'related' },
+
+            // Unova
+            { from: 'reshiram', to: 'zekrom', type: 'related' },
+            { from: 'kyurem', to: 'reshiram', type: 'cloned' },
+            { from: 'kyurem', to: 'zekrom', type: 'cloned' },
+            { from: 'cobalion', to: 'terrakion', type: 'related' },
+            { from: 'terrakion', to: 'virizion', type: 'related' },
+            { from: 'cobalion', to: 'keldeo', type: 'controls', arrow: true },
+            { from: 'terrakion', to: 'keldeo', type: 'controls', arrow: true },
+            { from: 'virizion', to: 'keldeo', type: 'controls', arrow: true },
+            { from: 'tornadus', to: 'thundurus', type: 'related' },
+            { from: 'landorus', to: 'tornadus', type: 'controls', arrow: true },
+            { from: 'landorus', to: 'thundurus', type: 'controls', arrow: true },
+            { from: 'landorus', to: 'enamorus', type: 'related' },
+
+            // Alola
+            { from: 'cosmog', to: 'cosmoem', type: 'cloned', arrow: true },
+            { from: 'cosmoem', to: 'solgaleo', type: 'cloned', arrow: true },
+            { from: 'cosmoem', to: 'lunala', type: 'cloned', arrow: true },
+            { from: 'necrozma', to: 'solgaleo', type: 'cloned' },
+            { from: 'necrozma', to: 'lunala', type: 'cloned' },
+            { from: 'solgaleo', to: 'lunala', type: 'related' },
+            { from: 'tapu-koko', to: 'tapu-lele', type: 'related' },
+            { from: 'tapu-lele', to: 'tapu-fini', type: 'related' },
+            { from: 'tapu-fini', to: 'tapu-bulu', type: 'related' },
+            { from: 'tapu-bulu', to: 'tapu-koko', type: 'related' },
+            { from: 'type-null', to: 'silvally', type: 'cloned', arrow: true },
+            { from: 'meltan', to: 'melmetal', type: 'cloned', arrow: true },
+
+            // Ultra Beasts
+            { from: 'buzzwole', to: 'pheromosa', type: 'related' },
+            { from: 'celesteela', to: 'kartana', type: 'related' },
+            { from: 'poipole', to: 'naganadel', type: 'cloned', arrow: true },
+            { from: 'stakataka', to: 'blacephalon', type: 'related' },
+            { from: 'silvally', to: 'nihilego', type: 'controls', subtle: true },
+
+            // Galar
+            { from: 'zacian', to: 'zamazenta', type: 'related' },
+            { from: 'eternatus', to: 'zacian', type: 'related' },
+            { from: 'eternatus', to: 'zamazenta', type: 'related' },
+            { from: 'galar-articuno', to: 'galar-zapdos', type: 'related' },
+            { from: 'galar-zapdos', to: 'galar-moltres', type: 'related' },
+            { from: 'kubfu', to: 'urshifu', type: 'cloned', arrow: true },
+            { from: 'calyrex', to: 'glastrier', type: 'controls', arrow: true },
+            { from: 'calyrex', to: 'spectrier', type: 'controls', arrow: true },
+
+            // Paldea & Kitakami
+            { from: 'terapagos', to: 'koraidon', type: 'cloned', arrow: true },
+            { from: 'terapagos', to: 'miraidon', type: 'cloned', arrow: true },
+            { from: 'koraidon', to: 'miraidon', type: 'related' },
+            { from: 'wo-chien', to: 'chien-pao', type: 'related' },
+            { from: 'chien-pao', to: 'chi-yu', type: 'related' },
+            { from: 'chi-yu', to: 'ting-lu', type: 'related' },
+            { from: 'ting-lu', to: 'wo-chien', type: 'related' },
+            { from: 'pecharunt', to: 'okidogi', type: 'controls', style: 'ortho', busY: 2645, arrow: true },
+            { from: 'pecharunt', to: 'munkidori', type: 'controls', style: 'ortho', busY: 2645, arrow: true },
+            { from: 'pecharunt', to: 'fezandipiti', type: 'controls', style: 'ortho', busY: 2645, arrow: true },
+            { from: 'fezandipiti', to: 'ogerpon', type: 'related' }
+        ];
+
+        const REL_META = {
+            created:  { label: 'Created / Gave Origin To', color: '#facc15', dash: '', marker: 'url(#arrow-created)' },
+            related:  { label: 'Related / Trio / Counterparts', color: '#38bdf8', dash: '', marker: '' },
+            controls: { label: 'Controls / Master / Subjugates', color: '#f87171', dash: '', marker: 'url(#arrow-controls)' },
+            cloned:   { label: 'Clone / Evolution / Alternate / Paradox', color: '#e879f9', dash: '8,6', marker: 'url(#arrow-cloned)' }
+        };
+
+        const TYPE_COLORS = {
+            'Normal': 'bg-stone-600/80 text-stone-100 border-stone-400/40',
+            'Steel': 'bg-slate-500/80 text-slate-100 border-slate-300/40',
+            'Dragon': 'bg-indigo-600/80 text-indigo-100 border-indigo-400/40',
+            'Water': 'bg-sky-600/80 text-sky-100 border-sky-400/40',
+            'Ghost': 'bg-purple-800/80 text-purple-100 border-purple-400/40',
+            'Psychic': 'bg-pink-600/80 text-pink-100 border-pink-400/40',
+            'Rock': 'bg-amber-700/80 text-amber-100 border-amber-400/40',
+            'Ice': 'bg-cyan-600/80 text-cyan-100 border-cyan-300/40',
+            'Electric': 'bg-yellow-400/90 text-slate-950 border-yellow-200/70',
+            'Fire': 'bg-orange-600/80 text-orange-100 border-orange-400/40',
+            'Flying': 'bg-violet-500/80 text-violet-100 border-violet-300/40',
+            'Ground': 'bg-amber-600/80 text-amber-100 border-amber-300/40',
+            'Grass': 'bg-emerald-600/80 text-emerald-100 border-emerald-400/40',
+            'Fighting': 'bg-red-700/80 text-red-100 border-red-400/40',
+            'Fairy': 'bg-rose-500/80 text-rose-100 border-rose-300/40',
+            'Dark': 'bg-zinc-800/90 text-zinc-200 border-zinc-500/50',
+            'Poison': 'bg-fuchsia-700/80 text-fuchsia-100 border-fuchsia-400/40',
+            'Bug': 'bg-lime-600/80 text-lime-100 border-lime-400/40'
+        };
+
+        const CAT_BADGE_STYLES = {
+            'Legendary': { short: 'LEG', cls: 'bg-sky-500/90 text-slate-950', modalCls: 'bg-sky-500/20 text-sky-200 border-sky-400/40' },
+            'Mythical': { short: 'MYTH', cls: 'bg-pink-500/90 text-white', modalCls: 'bg-pink-500/20 text-pink-200 border-pink-400/40' },
+            'Ultra Beast': { short: 'UB', cls: 'bg-purple-500/95 text-white', modalCls: 'bg-purple-500/20 text-purple-200 border-purple-400/40' }
+        };
+
+        // App State
+        let scale = 0.34;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let activeRelFilter = null;
+        let activeCatFilter = 'all';
+        let selectedPokemonId = null;
+
+        const worldEl = document.getElementById('world');
+        const viewportEl = document.getElementById('viewport');
+        const svgEl = document.getElementById('connections-svg');
+        const nodesLayerEl = document.getElementById('nodes-layer');
+        const regionsLayerEl = document.getElementById('regions-layer');
+        const detailPanelEl = document.getElementById('detail-panel');
+        const detailContentEl = document.getElementById('detail-content');
+        const detailDexEl = document.getElementById('detail-dex');
+        const detailCatBadgeEl = document.getElementById('detail-cat-badge');
+        const zoomLevelEl = document.getElementById('zoom-level');
+
+        const pokeMap = new Map(POKEMON_DATA.map(p => [p.id, p]));
+
+        function getSpriteUrl(poke) {
+            const id = poke.spriteId || poke.dex;
+            return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+        }
+
+        // 1. Twinkling Cosmic Starfield
+        function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                canvas.width = Math.floor(window.innerWidth * dpr);
+                canvas.height = Math.floor(window.innerHeight * dpr);
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.min(220, Math.floor((window.innerWidth * window.innerHeight) / 8500));
+                stars = Array.from({ length: count }, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.6 + 0.3,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    speed: (Math.random() - 0.5) * 0.015
+                }));
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                for (const s of stars) {
+                    s.alpha += s.speed;
+                    if (s.alpha > 1 || s.alpha < 0.15) s.speed *= -1;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 250, 235, ${s.alpha})`;
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize, { passive: true });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) requestAnimationFrame(draw);
+            });
+            resize();
+            draw();
+        }
+
+        // 2. Render Regions & Bottom Navigation Bar
+        function renderRegions() {
+            const regionBar = document.getElementById('region-bar');
+            regionBar.innerHTML = '';
+            regionsLayerEl.innerHTML = '';
+
+            REGIONS.forEach((reg, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `region-nav-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    idx === 0
+                        ? 'bg-amber-400 text-slate-950 shadow-md'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`;
+                btn.textContent = reg.label;
+                btn.dataset.regionId = reg.id;
+                btn.addEventListener('click', () => focusRegion(reg.id));
+                regionBar.appendChild(btn);
+
+                if (reg.box) {
+                    const box = document.createElement('div');
+                    box.className = 'region-box';
+                    box.id = `region-box-${reg.id}`;
+                    box.style.left = `${reg.box.x}px`;
+                    box.style.top = `${reg.box.y}px`;
+                    box.style.width = `${reg.box.w}px`;
+                    box.style.height = `${reg.box.h}px`;
+                    box.style.borderColor = `${reg.box.color}48`;
+
+                    const title = document.createElement('div');
+                    title.className = 'region-title';
+                    title.style.color = reg.box.color;
+                    title.style.borderColor = `${reg.box.color}55`;
+                    title.textContent = reg.box.title;
+
+                    box.appendChild(title);
+                    regionsLayerEl.appendChild(box);
+                }
+            });
+        }
+
+        // 3. Render SVG Connection Lines
+        function renderConnections() {
+            const defs = svgEl.querySelector('defs').outerHTML;
+            svgEl.innerHTML = defs;
+
+            CONNECTIONS.forEach((conn, idx) => {
+                const p1 = pokeMap.get(conn.from);
+                const p2 = pokeMap.get(conn.to);
+                if (!p1 || !p2) return;
+
+                const meta = REL_META[conn.type];
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+                let d = '';
+                if (conn.style === 'ortho' && conn.busY) {
+                    d = `M ${p1.x} ${p1.y} L ${p1.x} ${conn.busY} L ${p2.x} ${conn.busY} L ${p2.x} ${p2.y}`;
+                } else {
+                    d = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+                }
+
+                path.setAttribute('d', d);
+                path.setAttribute('stroke', meta.color);
+                path.setAttribute('stroke-width', conn.subtle ? '1.6' : '2.8');
+                path.setAttribute('stroke-opacity', conn.subtle ? '0.32' : '0.84');
+                if (meta.dash) {
+                    path.setAttribute('stroke-dasharray', meta.dash);
+                }
+                if (conn.arrow && meta.marker && !conn.subtle) {
+                    path.setAttribute('marker-mid', meta.marker);
+                }
+
+                path.classList.add('conn-line');
+                path.dataset.type = conn.type;
+                path.dataset.from = conn.from;
+                path.dataset.to = conn.to;
+                path.id = `conn-${idx}`;
+
+                svgEl.appendChild(path);
+            });
+        }
+
+        // 4. Render Pokémon Nodes & Update Category Counters
+        function renderNodes() {
+            nodesLayerEl.innerHTML = '';
+
+            document.getElementById('count-all').textContent = POKEMON_DATA.length;
+            document.getElementById('count-leg').textContent = POKEMON_DATA.filter(p => p.category === 'Legendary').length;
+            document.getElementById('count-myth').textContent = POKEMON_DATA.filter(p => p.category === 'Mythical').length;
+            document.getElementById('count-ub').textContent = POKEMON_DATA.filter(p => p.category === 'Ultra Beast').length;
+
+            POKEMON_DATA.forEach(poke => {
+                const node = document.createElement('div');
+                node.className = `poke-node ${poke.supreme ? 'supreme' : ''}`;
+                node.id = `node-${poke.id}`;
+                node.style.left = `${poke.x}px`;
+                node.style.top = `${poke.y}px`;
+                node.style.setProperty('--ring-color', poke.ring);
+                node.style.setProperty('--ring-glow', `${poke.ring}55`);
+
+                const imgUrl = getSpriteUrl(poke);
+                const fallbackUrl = `https://placehold.co/120x120/0f172a/facc15?text=${encodeURIComponent(poke.name)}`;
+                const badge = CAT_BADGE_STYLES[poke.category];
+
+                node.innerHTML = `
+                    <div class="node-circle">
+                        <span class="node-badge-tag ${badge.cls}">${badge.short}</span>
+                        <img src="${imgUrl}" alt="${poke.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackUrl}';">
+                    </div>
+                    <div class="node-label">
+                        <div class="node-name">${poke.name}</div>
+                        <div class="node-role">${poke.role}</div>
+                    </div>
+                `;
+
+                node.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectPokemon(poke.id);
+                });
+
+                node.addEventListener('mouseenter', () => highlightNeighborhood(poke.id, true));
+                node.addEventListener('mouseleave', () => highlightNeighborhood(poke.id, false));
+
+                nodesLayerEl.appendChild(node);
+            });
+        }
+
+        // 5. Hover Neighborhood Highlight
+        function highlightNeighborhood(pokeId, active) {
+            if (activeRelFilter || activeCatFilter !== 'all') return;
+            document.querySelectorAll('.conn-line').forEach(line => {
+                const isConnected = line.dataset.from === pokeId || line.dataset.to === pokeId;
+                if (active) {
+                    line.classList.toggle('highlighted', isConnected);
+                    line.classList.toggle('dimmed', !isConnected);
+                } else {
+                    line.classList.remove('highlighted', 'dimmed');
+                }
+            });
+        }
+
+        // 6. Combined Category & Relationship Filtering
+        function applyFilters() {
+            const resetBtn = document.getElementById('reset-filter-btn');
+            const hasAnyFilter = Boolean(activeRelFilter) || activeCatFilter !== 'all';
+            resetBtn.classList.toggle('hidden', !hasAnyFilter);
+
+            document.querySelectorAll('.legend-btn').forEach(btn => {
+                const isMatch = btn.dataset.rel === activeRelFilter;
+                btn.classList.toggle('bg-white/15', isMatch);
+                btn.classList.toggle('ring-1', isMatch);
+                btn.classList.toggle('ring-amber-400', isMatch);
+            });
+
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                const isMatch = btn.dataset.cat === activeCatFilter;
+                btn.className = `cat-btn px-3 py-1 rounded-xl text-[11px] font-bold transition ${
+                    isMatch
+                        ? 'bg-amber-400 text-slate-950 shadow'
+                        : 'text-slate-200 hover:bg-white/10'
+                }`;
+            });
+
+            const relConnectedIds = new Set();
+            document.querySelectorAll('.conn-line').forEach(line => {
+                if (!activeRelFilter) {
+                    line.classList.remove('dimmed', 'highlighted');
+                } else if (line.dataset.type === activeRelFilter) {
+                    line.classList.remove('dimmed');
+                    line.classList.add('highlighted');
+                    relConnectedIds.add(line.dataset.from);
+                    relConnectedIds.add(line.dataset.to);
+                } else {
+                    line.classList.add('dimmed');
+                    line.classList.remove('highlighted');
+                }
+            });
+
+            document.querySelectorAll('.poke-node').forEach(node => {
+                const id = node.id.replace('node-', '');
+                const poke = pokeMap.get(id);
+                const matchesCat = activeCatFilter === 'all' || poke.category === activeCatFilter;
+                const matchesRel = !activeRelFilter || relConnectedIds.has(id);
+                node.classList.toggle('dimmed', !(matchesCat && matchesRel));
+            });
+        }
+
+        // 7. Side Encyclopedia Drawer
+        function selectPokemon(pokeId, shouldCenter = false) {
+            const poke = pokeMap.get(pokeId);
+            if (!poke) return;
+
+            selectedPokemonId = pokeId;
+            document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('selected'));
+            const activeNode = document.getElementById(`node-${pokeId}`);
+            if (activeNode) activeNode.classList.add('selected');
+
+            if (shouldCenter) {
+                centerOnPoint(poke.x, poke.y, Math.max(scale, 0.92));
+            }
+
+            const regObj = REGIONS.find(r => r.id === poke.region);
+            const imgUrl = getSpriteUrl(poke);
+            const fallbackUrl = `https://placehold.co/240x240/0f172a/facc15?text=${encodeURIComponent(poke.name)}`;
+            const catStyle = CAT_BADGE_STYLES[poke.category];
+
+            const relations = CONNECTIONS.filter(c => c.from === pokeId || c.to === pokeId).map(c => {
+                const isSource = c.from === pokeId;
+                const otherId = isSource ? c.to : c.from;
+                const otherPoke = pokeMap.get(otherId);
+                let relationDesc = REL_META[c.type].label;
+                if (c.type === 'created') relationDesc = isSource ? 'Created / Gave Origin To' : 'Created / Originated From';
+                if (c.type === 'controls') relationDesc = isSource ? 'Controls / Subjugates / Balances' : 'Controlled / Balanced By';
+                if (c.type === 'cloned') relationDesc = isSource ? 'Evolves / Cloned / Forms Into' : 'Evolved / Cloned / Paradox From';
+                return { other: otherPoke, desc: relationDesc, color: REL_META[c.type].color };
+            });
+
+            detailDexEl.textContent = `National Dex #${String(poke.dex).padStart(4, '0')}`;
+            detailCatBadgeEl.textContent = poke.category;
+            detailCatBadgeEl.className = `text-xs font-bold px-2.5 py-1 rounded-full border ${catStyle.modalCls}`;
+
+            const typesHtml = poke.types.map(t => {
+                const cls = TYPE_COLORS[t] || 'bg-slate-700 text-white border-slate-500';
+                return `<span class="px-3 py-1 rounded-full text-xs font-bold border ${cls}">${t}</span>`;
+            }).join('');
+
+            const relHtml = relations.length
+                ? relations.map(r => `
+                    <button onclick="selectPokemon('${r.other.id}', true)" class="w-full flex items-center gap-3 p-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-400/50 transition text-left group">
+                        <img src="${getSpriteUrl(r.other)}" alt="${r.other.name}" class="w-11 h-11 object-contain bg-slate-950 rounded-full p-1 border border-slate-700 group-hover:scale-105 transition">
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-white truncate">${r.other.name}</div>
+                            <div class="text-[11px] font-medium truncate" style="color: ${r.color}">${r.desc}</div>
+                        </div>
+                        <span class="text-slate-500 group-hover:text-amber-300 text-sm pr-1">→</span>
+                    </button>
+                `).join('')
+                : `<p class="text-xs text-slate-400 italic">Standalone mythological entity with no direct line connections.</p>`;
+
+            detailContentEl.innerHTML = `
+                <div class="relative flex flex-col items-center text-center bg-gradient-to-b from-slate-900 to-slate-950 rounded-3xl p-5 border border-slate-800">
+                    <div class="w-40 h-40 rounded-full flex items-center justify-center relative mb-3" style="background: radial-gradient(circle, ${poke.ring}38 0%, transparent 70%);">
+                        <img src="${imgUrl}" alt="${poke.name}" onerror="this.onerror=null;this.src='${fallbackUrl}';" class="w-36 h-36 object-contain drop-shadow-[0_10px_22px_rgba(0,0,0,0.9)]">
+                    </div>
+                    <h2 class="font-myth text-2xl font-black tracking-wider text-white">${poke.name}</h2>
+                    <p class="text-xs font-semibold uppercase tracking-widest mt-1" style="color: ${poke.ring}">${poke.role}</p>
+                    <div class="flex flex-wrap justify-center gap-2 mt-3">
+                        ${typesHtml}
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                            ${regObj ? regObj.label : poke.region}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/75 rounded-2xl p-4 border border-slate-800/90">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">Mythology & Cosmic Lore</h3>
+                    <p class="text-sm text-slate-200 leading-relaxed">${poke.lore}</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Genealogical & Lore Links (${relations.length})</h3>
+                    <div class="space-y-2">
+                        ${relHtml}
+                    </div>
+                </div>
+            `;
+
+            detailPanelEl.classList.remove('translate-x-full');
+        }
+
+        // 8. Camera Pan & Zoom Engine
+        function applyTransform(smooth = false) {
+            worldEl.style.transition = smooth ? 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
+            worldEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            zoomLevelEl.textContent = `${Math.round(scale * 100)}%`;
+        }
+
+        function centerOnPoint(worldX, worldY, targetScale = scale) {
+            scale = Math.min(Math.max(targetScale, 0.22), 1.75);
+            panX = window.innerWidth / 2 - worldX * scale;
+            panY = window.innerHeight / 2 - worldY * scale;
+            applyTransform(true);
+        }
+
+        function focusRegion(regionId) {
+            const reg = REGIONS.find(r => r.id === regionId);
+            if (!reg) return;
+
+            document.querySelectorAll('.region-nav-btn').forEach(btn => {
+                const active = btn.dataset.regionId === regionId;
+                btn.className = `region-nav-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+                    active
+                        ? 'bg-amber-400 text-slate-950 shadow-md'
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`;
+            });
+
+            document.querySelectorAll('.region-box').forEach(box => {
+                box.classList.toggle('active-region', box.id === `region-box-${regionId}`);
+            });
+
+            if (regionId === 'all') {
+                const fitScaleX = (window.innerWidth - 40) / 4800;
+                const fitScaleY = (window.innerHeight - 140) / 3050;
+                const fitScale = Math.max(Math.min(fitScaleX, fitScaleY), 0.24);
+                centerOnPoint(2400, 1520, fitScale);
+            } else {
+                const mobileFactor = window.innerWidth < 768 ? 0.65 : 1;
+                centerOnPoint(reg.focus.x, reg.focus.y, reg.focus.zoom * mobileFactor);
+            }
+        }
+
+        // 9. Mouse, Touch, Search & Filter Listeners
+        function initInteractions() {
+            const hintToast = document.getElementById('hint-toast');
+            const hideHint = () => {
+                if (hintToast) hintToast.style.opacity = '0';
+            };
+
+            viewportEl.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.poke-node')) return;
+                isDragging = true;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+                hideHint();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                applyTransform(false);
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Touch Pan & Pinch-to-Zoom
+            let initialPinchDist = null;
+            let initialScale = scale;
+
+            viewportEl.addEventListener('touchstart', (e) => {
+                hideHint();
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    startX = e.touches[0].clientX - panX;
+                    startY = e.touches[0].clientY - panY;
+                } else if (e.touches.length === 2) {
+                    isDragging = false;
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    initialScale = scale;
+                }
+            }, { passive: true });
+
+            viewportEl.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1 && isDragging) {
+                    panX = e.touches[0].clientX - startX;
+                    panY = e.touches[0].clientY - startY;
+                    applyTransform(false);
+                } else if (e.touches.length === 2 && initialPinchDist) {
+                    const dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const newScale = Math.min(Math.max(initialScale * (dist / initialPinchDist), 0.22), 1.75);
+                    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    panX = midX - ((midX - panX) / scale) * newScale;
+                    panY = midY - ((midY - panY) / scale) * newScale;
+                    scale = newScale;
+                    applyTransform(false);
+                }
+            }, { passive: true });
+
+            viewportEl.addEventListener('touchend', () => {
+                isDragging = false;
+                initialPinchDist = null;
+            });
+
+            // Mouse Wheel Zoom
+            viewportEl.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                hideHint();
+                const zoomFactor = e.deltaY < 0 ? 1.13 : 0.88;
+                const newScale = Math.min(Math.max(scale * zoomFactor, 0.22), 1.75);
+                panX = e.clientX - ((e.clientX - panX) / scale) * newScale;
+                panY = e.clientY - ((e.clientY - panY) / scale) * newScale;
+                scale = newScale;
+                applyTransform(false);
+            }, { passive: false });
+
+            // Zoom Controls
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                centerOnPoint(
+                    (window.innerWidth / 2 - panX) / scale,
+                    (window.innerHeight / 2 - panY) / scale,
+                    scale * 1.24
+                );
+            });
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                centerOnPoint(
+                    (window.innerWidth / 2 - panX) / scale,
+                    (window.innerHeight / 2 - panY) / scale,
+                    scale * 0.8
+                );
+            });
+            document.getElementById('zoom-reset').addEventListener('click', () => focusRegion('all'));
+
+            // Category Pills
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    activeCatFilter = btn.dataset.cat;
+                    applyFilters();
+                });
+            });
+
+            // Relationship Legend Filters
+            document.querySelectorAll('.legend-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const rel = btn.dataset.rel;
+                    activeRelFilter = activeRelFilter === rel ? null : rel;
+                    applyFilters();
+                });
+            });
+
+            document.getElementById('reset-filter-btn').addEventListener('click', () => {
+                activeRelFilter = null;
+                activeCatFilter = 'all';
+                applyFilters();
+            });
+
+            // Close Detail Drawer
+            document.getElementById('close-detail').addEventListener('click', () => {
+                detailPanelEl.classList.add('translate-x-full');
+                document.querySelectorAll('.poke-node').forEach(n => n.classList.remove('selected'));
+            });
+
+            // Search Bar
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            const clearSearchBtn = document.getElementById('clear-search');
+
+            searchInput.addEventListener('input', () => {
+                const q = searchInput.value.trim().toLowerCase();
+                clearSearchBtn.classList.toggle('hidden', !q);
+
+                if (!q) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+
+                const matches = POKEMON_DATA.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.role.toLowerCase().includes(q) ||
+                    p.category.toLowerCase().includes(q) ||
+                    p.region.toLowerCase().includes(q)
+                );
+
+                if (!matches.length) {
+                    searchResults.innerHTML = `<div class="p-3 text-xs text-slate-400">No matching Pokémon found...</div>`;
+                } else {
+                    searchResults.innerHTML = matches.map(p => `
+                        <button class="search-item w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-800 transition text-left border-b border-slate-800/60 last:border-none" data-id="${p.id}">
+                            <img src="${getSpriteUrl(p)}" alt="${p.name}" class="w-8 h-8 object-contain">
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-white truncate">${p.name}</div>
+                                <div class="text-[10px] text-slate-400 truncate">${p.role} • ${p.category}</div>
+                            </div>
+                        </button>
+                    `).join('');
+
+                    searchResults.querySelectorAll('.search-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const id = item.dataset.id;
+                            searchResults.classList.add('hidden');
+                            selectPokemon(id, true);
+                        });
+                    });
+                }
+                searchResults.classList.remove('hidden');
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                searchResults.classList.add('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#search-input') && !e.target.closest('#search-results')) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        // =====================================================================
+        // COMPLETE NATIONAL POKÉDEX ENGINE (ALL 1,025 POKÉMON, GEN 1–9)
+        // =====================================================================
+        const DEX_REGIONS = [
+            { id: 'all', label: 'All Regions', min: 1, max: 1025 },
+            { id: 'kanto', label: 'Kanto', min: 1, max: 151 },
+            { id: 'johto', label: 'Johto', min: 152, max: 251 },
+            { id: 'hoenn', label: 'Hoenn', min: 252, max: 386 },
+            { id: 'sinnoh', label: 'Sinnoh', min: 387, max: 493 },
+            { id: 'unova', label: 'Unova', min: 494, max: 649 },
+            { id: 'kalos', label: 'Kalos', min: 650, max: 721 },
+            { id: 'alola', label: 'Alola', min: 722, max: 809 },
+            { id: 'galar', label: 'Galar & Hisui', min: 810, max: 905 },
+            { id: 'paldea', label: 'Paldea', min: 906, max: 1025 }
+        ];
+
+        const STARTER_IDS = new Set([
+            1,2,3, 4,5,6, 7,8,9,
+            152,153,154, 155,156,157, 158,159,160,
+            252,253,254, 255,256,257, 258,259,260,
+            387,388,389, 390,391,392, 393,394,395,
+            495,496,497, 498,499,500, 501,502,503,
+            650,651,652, 653,654,655, 656,657,658,
+            722,723,724, 725,726,727, 728,729,730,
+            810,811,812, 813,814,815, 816,817,818,
+            906,907,908, 909,910,911, 912,913,914
+        ]);
+
+        const PSEUDO_IDS = new Set([
+            147,148,149, 246,247,248, 371,372,373, 374,375,376,
+            443,444,445, 633,634,635, 704,705,706, 782,783,784,
+            885,886,887, 996,997,998
+        ]);
+
+        // Map dex -> category from our curated POKEMON_DATA
+        const dexCategoryLookup = new Map();
+        const dexLoreLookup = new Map();
+        POKEMON_DATA.forEach(p => {
+            if (!dexCategoryLookup.has(p.dex)) {
+                dexCategoryLookup.set(p.dex, p.category);
+                dexLoreLookup.set(p.dex, p.lore);
+            }
+        });
+
+        let dexMasterList = [];
+        let dexFilteredList = [];
+        let dexRenderedCount = 0;
+        const DEX_BATCH_SIZE = 60;
+        let dexCurrentRegion = 'all';
+        let dexCurrentType = 'all';
+        let dexCurrentRarity = 'all';
+        let dexSearchQuery = '';
+        let dexActiveId = 1;
+        let dexShinyMode = false;
+
+        // Caches for PokeAPI
+        const pokeDetailCache = new Map();
+        const pokeSpeciesCache = new Map();
+        const typeMemberCache = new Map();
+        let cardObserver = null;
+
+        function getRegionForDex(id) {
+            for (const r of DEX_REGIONS) {
+                if (r.id !== 'all' && id >= r.min && id <= r.max) return r.label;
+            }
+            return 'Unknown';
+        }
+
+        function formatPokeName(raw) {
+            const specialNames = {
+                'nidoran-f': 'Nidoran♀',
+                'nidoran-m': 'Nidoran♂',
+                'mr-mime': 'Mr. Mime',
+                'mime-jr': 'Mime Jr.',
+                'mr-rime': 'Mr. Rime',
+                'type-null': 'Type: Null',
+                'ho-oh': 'Ho-Oh',
+                'porygon-z': 'Porygon-Z',
+                'jangmo-o': 'Jangmo-o',
+                'hakamo-o': 'Hakamo-o',
+                'kommo-o': 'Kommo-o',
+                'tapu-koko': 'Tapu Koko',
+                'tapu-lele': 'Tapu Lele',
+                'tapu-bulu': 'Tapu Bulu',
+                'tapu-fini': 'Tapu Fini',
+                'great-tusk': 'Great Tusk',
+                'scream-tail': 'Scream Tail',
+                'brute-bonnet': 'Brute Bonnet',
+                'flutter-mane': 'Flutter Mane',
+                'slither-wing': 'Slither Wing',
+                'sandy-shocks': 'Sandy Shocks',
+                'iron-treads': 'Iron Treads',
+                'iron-bundle': 'Iron Bundle',
+                'iron-hands': 'Iron Hands',
+                'iron-jugulis': 'Iron Jugulis',
+                'iron-moth': 'Iron Moth',
+                'iron-thorns': 'Iron Thorns',
+                'roaring-moon': 'Roaring Moon',
+                'iron-valiant': 'Iron Valiant',
+                'walking-wake': 'Walking Wake',
+                'iron-leaves': 'Iron Leaves',
+                'gouging-fire': 'Gouging Fire',
+                'raging-bolt': 'Raging Bolt',
+                'iron-boulder': 'Iron Boulder',
+                'iron-crown': 'Iron Crown',
+                'wo-chien': 'Wo-Chien',
+                'chien-pao': 'Chien-Pao',
+                'ting-lu': 'Ting-Lu',
+                'chi-yu': 'Chi-Yu'
+            };
+            if (specialNames[raw]) return specialNames[raw];
+            return raw.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        function switchAppMode(mode) {
+            const isTree = mode === 'tree';
+            const isDex = mode === 'dex';
+            const modes = [
+                ['mode-tree-btn', isTree],
+                ['mode-dex-btn', isDex],
+                ['mode-quiz-btn', mode === 'quiz']
+            ];
+            modes.forEach(([id, active]) => {
+                const btn = document.getElementById(id);
+                btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide transition flex items-center gap-1.5 ${
+                    active ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`;
+            });
+
+            document.getElementById('viewport').classList.toggle('hidden', !isTree);
+            document.getElementById('tree-search-wrap').classList.toggle('hidden', !isTree);
+            document.getElementById('tree-cat-bar').classList.toggle('hidden', !isTree);
+            document.getElementById('tree-legend-box').classList.toggle('hidden', !isTree);
+            document.getElementById('tree-bottom-nav').classList.toggle('hidden', !isTree);
+            document.getElementById('tree-zoom-controls').classList.toggle('hidden', !isTree);
+            document.getElementById('hint-toast').classList.toggle('hidden', !isTree);
+            document.getElementById('pokedex-view').classList.toggle('hidden', !isDex);
+            document.getElementById('quiz-view').classList.toggle('hidden', mode !== 'quiz');
+
+            if ((isDex || mode === 'quiz') && dexMasterList.length === 0) {
+                initNationalPokedex().then(() => {
+                    if (mode === 'quiz') nextQuizQuestion();
+                });
+            } else if (mode === 'quiz' && !quizCurrentQuestion) {
+                nextQuizQuestion();
+            }
+        }
+
+        async function initNationalPokedex() {
+            renderDexRegionTabs();
+            const statusText = document.getElementById('dex-status-text');
+            statusText.textContent = 'Fetching all 1,025 Pokémon from National Pokédex archives...';
+
+            try {
+                const res = await fetch('https://pokeapi.co/api/v2/pokemon-species?limit=1025');
+                const data = await res.json();
+                dexMasterList = data.results.map((item, index) => {
+                    const id = index + 1;
+                    return {
+                        id,
+                        slug: item.name,
+                        name: formatPokeName(item.name),
+                        region: getRegionForDex(id),
+                        rarity: dexCategoryLookup.get(id) || 'Regular',
+                        isStarter: STARTER_IDS.has(id),
+                        isPseudo: PSEUDO_IDS.has(id),
+                        types: null
+                    };
+                });
+            } catch (err) {
+                // Fallback 1..1025 index if network hiccups
+                dexMasterList = Array.from({ length: 1025 }, (_, i) => {
+                    const id = i + 1;
+                    const known = POKEMON_DATA.find(p => p.dex === id);
+                    return {
+                        id,
+                        slug: known ? known.name.toLowerCase() : `pokemon-${id}`,
+                        name: known ? formatPokeName(known.name.toLowerCase()) : `Pokémon #${String(id).padStart(4, '0')}`,
+                        region: getRegionForDex(id),
+                        rarity: dexCategoryLookup.get(id) || 'Regular',
+                        isStarter: STARTER_IDS.has(id),
+                        isPseudo: PSEUDO_IDS.has(id),
+                        types: known ? known.types : null
+                    };
+                });
+            }
+
+            setupCardObserver();
+            applyDexFilters();
+        }
+
+        function renderDexRegionTabs() {
+            const container = document.getElementById('dex-region-tabs');
+            container.innerHTML = DEX_REGIONS.map(r => {
+                const count = r.max - r.min + 1;
+                const active = r.id === dexCurrentRegion;
+                return `
+                    <button data-dex-reg="${r.id}" class="dex-reg-btn px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+                        active ? 'bg-amber-400 text-slate-950 shadow' : 'bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800'
+                    }">
+                        ${r.label} <span class="opacity-75 font-mono text-[10px]">(${count})</span>
+                    </button>
+                `;
+            }).join('');
+
+            container.querySelectorAll('.dex-reg-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    dexCurrentRegion = btn.dataset.dexReg;
+                    renderDexRegionTabs();
+                    applyDexFilters();
+                });
+            });
+        }
+
+        async function fetchTypeSet(typeName) {
+            if (typeMemberCache.has(typeName)) return typeMemberCache.get(typeName);
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName.toLowerCase()}`);
+                const data = await res.json();
+                const idSet = new Set();
+                data.pokemon.forEach(entry => {
+                    const parts = entry.pokemon.url.split('/').filter(Boolean);
+                    const id = parseInt(parts[parts.length - 1], 10);
+                    if (id >= 1 && id <= 1025) idSet.add(id);
+                });
+                typeMemberCache.set(typeName, idSet);
+                return idSet;
+            } catch {
+                return null;
+            }
+        }
+
+        async function applyDexFilters() {
+            const grid = document.getElementById('dex-grid');
+            const statusText = document.getElementById('dex-status-text');
+            const loadMoreBtn = document.getElementById('dex-load-more');
+
+            let typeIdSet = null;
+            if (dexCurrentType !== 'all') {
+                statusText.textContent = `Filtering ${dexCurrentType}-type Pokémon...`;
+                typeIdSet = await fetchTypeSet(dexCurrentType);
+            }
+
+            const regObj = DEX_REGIONS.find(r => r.id === dexCurrentRegion) || DEX_REGIONS[0];
+            const q = dexSearchQuery.trim().toLowerCase().replace('#', '');
+
+            dexFilteredList = dexMasterList.filter(p => {
+                if (p.id < regObj.min || p.id > regObj.max) return false;
+                if (dexCurrentRarity !== 'all' && p.rarity !== dexCurrentRarity) return false;
+                if (typeIdSet && !typeIdSet.has(p.id)) return false;
+                if (q) {
+                    const padded = String(p.id).padStart(4, '0');
+                    const padded3 = String(p.id).padStart(3, '0');
+                    if (!p.name.toLowerCase().includes(q) && !padded.includes(q) && !padded3.includes(q) && String(p.id) !== q) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            document.getElementById('dex-showing-count').textContent = dexFilteredList.length.toLocaleString();
+            grid.innerHTML = '';
+            dexRenderedCount = 0;
+
+            if (dexFilteredList.length === 0) {
+                statusText.textContent = 'No Pokémon match your current region, type, or search filters.';
+                loadMoreBtn.classList.add('hidden');
+                return;
+            }
+
+            renderNextDexBatch();
+        }
+
+        function renderNextDexBatch() {
+            const grid = document.getElementById('dex-grid');
+            const statusText = document.getElementById('dex-status-text');
+            const loadMoreBtn = document.getElementById('dex-load-more');
+
+            const nextSlice = dexFilteredList.slice(dexRenderedCount, dexRenderedCount + DEX_BATCH_SIZE);
+            nextSlice.forEach(p => {
+                const card = document.createElement('button');
+                card.className = 'dex-card group relative bg-slate-950/85 hover:bg-slate-900/95 border border-slate-800/90 hover:border-amber-400/60 rounded-3xl p-3.5 text-left transition-all duration-200 hover:-translate-y-1 shadow-xl flex flex-col justify-between';
+                card.dataset.dexId = p.id;
+
+                let rarityPill = '';
+                if (p.rarity === 'Legendary') {
+                    rarityPill = `<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">Legendary</span>`;
+                } else if (p.rarity === 'Mythical') {
+                    rarityPill = `<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-400/30">Mythical</span>`;
+                } else if (p.rarity === 'Ultra Beast') {
+                    rarityPill = `<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30">Ultra Beast</span>`;
+                } else if (p.isStarter) {
+                    rarityPill = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/25">Starter</span>`;
+                } else if (p.isPseudo) {
+                    rarityPill = `<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/25">Pseudo</span>`;
+                }
+
+                const artUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
+                const fallbackUrl = `https://placehold.co/160x160/0f172a/facc15?text=%23${p.id}`;
+
+                const cachedDetail = pokeDetailCache.get(p.id);
+                const typesHtml = cachedDetail
+                    ? cachedDetail.types.map(t => `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${TYPE_COLORS[t] || 'bg-slate-800 text-slate-200 border-slate-600'}">${t}</span>`).join('')
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 text-slate-500 border border-slate-800">•••</span>`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-1 w-full">
+                        <span class="font-mono text-[11px] font-bold text-slate-400 group-hover:text-amber-300 transition">#${String(p.id).padStart(4, '0')}</span>
+                        ${rarityPill}
+                    </div>
+                    <div class="my-2 w-full h-28 sm:h-32 flex items-center justify-center relative">
+                        <div class="absolute inset-4 rounded-full bg-amber-400/5 group-hover:bg-amber-400/15 blur-xl transition"></div>
+                        <img src="${artUrl}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackUrl}';" class="w-24 h-24 sm:w-28 sm:h-28 object-contain relative z-10 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_6px_12px_rgba(0,0,0,0.85)]">
+                    </div>
+                    <div class="w-full space-y-1.5">
+                        <div class="flex items-center justify-between gap-1">
+                            <h3 class="font-bold text-xs sm:text-sm text-white truncate group-hover:text-amber-200 transition">${p.name}</h3>
+                        </div>
+                        <div class="flex items-center justify-between gap-1">
+                            <div class="dex-card-types flex flex-wrap gap-1">${typesHtml}</div>
+                            <span class="text-[10px] text-slate-500 font-medium shrink-0">${p.region.split(' ')[0]}</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => openDexModal(p.id));
+                grid.appendChild(card);
+                if (cardObserver && !cachedDetail) {
+                    cardObserver.observe(card);
+                }
+            });
+
+            dexRenderedCount += nextSlice.length;
+            statusText.textContent = `Showing ${dexRenderedCount} of ${dexFilteredList.length} Pokémon`;
+            loadMoreBtn.classList.toggle('hidden', dexRenderedCount >= dexFilteredList.length);
+        }
+
+        function setupCardObserver() {
+            if (cardObserver) cardObserver.disconnect();
+            cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const card = entry.target;
+                    const id = parseInt(card.dataset.dexId, 10);
+                    cardObserver.unobserve(card);
+                    hydrateCardTypes(id, card);
+                });
+            }, { rootMargin: '240px' });
+        }
+
+        async function hydrateCardTypes(id, cardEl) {
+            const detail = await getPokemonFullData(id);
+            if (!detail || !cardEl) return;
+            const typesWrap = cardEl.querySelector('.dex-card-types');
+            if (typesWrap) {
+                typesWrap.innerHTML = detail.types.map(t =>
+                    `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${TYPE_COLORS[t] || 'bg-slate-800 text-slate-200 border-slate-600'}">${t}</span>`
+                ).join('');
+            }
+        }
+
+        async function getPokemonFullData(id) {
+            if (pokeDetailCache.has(id)) return pokeDetailCache.get(id);
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                const data = await res.json();
+                const parsed = {
+                    id,
+                    types: data.types.map(t => t.type.name.charAt(0).toUpperCase() + t.type.name.slice(1)),
+                    height: (data.height / 10).toFixed(1),
+                    weight: (data.weight / 10).toFixed(1),
+                    abilities: data.abilities.map(a => ({
+                        name: formatPokeName(a.ability.name),
+                        isHidden: a.is_hidden
+                    })),
+                    stats: data.stats.map(s => ({
+                        name: s.stat.name,
+                        value: s.base_stat
+                    }))
+                };
+                pokeDetailCache.set(id, parsed);
+                return parsed;
+            } catch {
+                return null;
+            }
+        }
+
+        async function getPokemonSpeciesData(id) {
+            if (pokeSpeciesCache.has(id)) return pokeSpeciesCache.get(id);
+            try {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+                const data = await res.json();
+                const genusObj = data.genera.find(g => g.language.name === 'en');
+                const englishEntries = data.flavor_text_entries.filter(f => f.language.name === 'en');
+                // Pick the most recent clean English flavor text
+                const latestEntry = englishEntries.length ? englishEntries[englishEntries.length - 1].flavor_text : '';
+                const cleanFlavor = latestEntry.replace(/[\f\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+                const parsed = {
+                    genus: genusObj ? genusObj.genus : 'Pokémon',
+                    flavor: cleanFlavor || dexLoreLookup.get(id) || 'A mysterious Pokémon recorded in the National Pokédex.',
+                    habitat: data.habitat ? formatPokeName(data.habitat.name) : 'Unknown / Varied',
+                    captureRate: data.capture_rate,
+                    growthRate: data.growth_rate ? formatPokeName(data.growth_rate.name) : 'Medium'
+                };
+                pokeSpeciesCache.set(id, parsed);
+                return parsed;
+            } catch {
+                return {
+                    genus: 'Pokémon',
+                    flavor: dexLoreLookup.get(id) || 'Registered entry in the National Pokédex.',
+                    habitat: 'Varied',
+                    captureRate: '—',
+                    growthRate: 'Standard'
+                };
+            }
+        }
+
+        async function openDexModal(id) {
+            dexActiveId = id;
+            const modal = document.getElementById('dex-modal');
+            const body = document.getElementById('dex-modal-body');
+            modal.classList.remove('hidden');
+
+            const meta = dexMasterList.find(p => p.id === id) || {
+                id,
+                name: `Pokémon #${id}`,
+                region: getRegionForDex(id),
+                rarity: dexCategoryLookup.get(id) || 'Regular'
+            };
+
+            body.innerHTML = `
+                <div class="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <div class="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-xs font-semibold tracking-wider uppercase">Decrypting Pokédex Entry #${String(id).padStart(4, '0')}...</p>
+                </div>
+            `;
+
+            const [detail, species] = await Promise.all([
+                getPokemonFullData(id),
+                getPokemonSpeciesData(id)
+            ]);
+
+            if (dexActiveId !== id) return; // User clicked another Pokémon while loading
+
+            const artUrl = dexShinyMode
+                ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${id}.png`
+                : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+            const normalFallback = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+            const typesHtml = (detail?.types || ['Unknown']).map(t =>
+                `<span class="px-3.5 py-1 rounded-full text-xs font-bold border ${TYPE_COLORS[t] || 'bg-slate-800 text-white border-slate-600'}">${t}</span>`
+            ).join('');
+
+            const statLabels = {
+                'hp': { label: 'HP', color: 'bg-emerald-400' },
+                'attack': { label: 'Attack', color: 'bg-orange-400' },
+                'defense': { label: 'Defense', color: 'bg-amber-400' },
+                'special-attack': { label: 'Sp. Atk', color: 'bg-sky-400' },
+                'special-defense': { label: 'Sp. Def', color: 'bg-indigo-400' },
+                'speed': { label: 'Speed', color: 'bg-pink-400' }
+            };
+
+            let bst = 0;
+            const statsHtml = (detail?.stats || []).map(st => {
+                bst += st.value;
+                const info = statLabels[st.name] || { label: st.name, color: 'bg-amber-400' };
+                const pct = Math.min(100, Math.round((st.value / 200) * 100));
+                return `
+                    <div class="grid grid-cols-12 items-center gap-2 text-xs">
+                        <span class="col-span-3 sm:col-span-2 font-semibold text-slate-400">${info.label}</span>
+                        <span class="col-span-2 sm:col-span-1 font-mono font-bold text-white text-right">${st.value}</span>
+                        <div class="col-span-7 sm:col-span-9 h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div class="h-full ${info.color} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const abilitiesHtml = (detail?.abilities || []).map(ab => `
+                <span class="px-3 py-1 rounded-xl text-xs font-semibold ${ab.isHidden ? 'bg-purple-500/15 text-purple-200 border border-purple-400/30' : 'bg-slate-900 text-slate-200 border border-slate-700'}">
+                    ${ab.name}${ab.isHidden ? ' <span class="text-[10px] opacity-75">(Hidden)</span>' : ''}
+                </span>
+            `).join('');
+
+            const customMythLore = dexLoreLookup.get(id);
+
+            body.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center bg-gradient-to-br from-slate-900/95 via-slate-950 to-slate-900/90 p-5 rounded-3xl border border-slate-800">
+                    <div class="md:col-span-5 flex flex-col items-center justify-center relative">
+                        <div class="w-44 h-44 rounded-full bg-amber-400/10 blur-2xl absolute"></div>
+                        <img src="${artUrl}" alt="${meta.name}" onerror="this.onerror=null;this.src='${normalFallback}';" class="w-44 h-44 sm:w-48 sm:h-48 object-contain relative z-10 drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)]">
+                    </div>
+                    <div class="md:col-span-7 space-y-3 text-center md:text-left">
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <span class="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
+                                National Dex #${String(id).padStart(4, '0')}
+                            </span>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                                ${meta.region}
+                            </span>
+                            ${meta.rarity !== 'Regular' ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-200 border border-pink-400/30">${meta.rarity}</span>` : ''}
+                        </div>
+
+                        <div>
+                            <h2 class="font-myth text-2xl sm:text-3xl font-black tracking-wider text-white">${meta.name}</h2>
+                            <p class="text-xs font-semibold uppercase tracking-widest text-amber-300/90 mt-0.5">${species.genus}</p>
+                        </div>
+
+                        <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                            ${typesHtml}
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 pt-1">
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Height</div>
+                                <div class="text-sm font-bold text-white mt-0.5">${detail ? detail.height + ' m' : '—'}</div>
+                            </div>
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Weight</div>
+                                <div class="text-sm font-bold text-white mt-0.5">${detail ? detail.weight + ' kg' : '—'}</div>
+                            </div>
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-2.5 text-center">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Capture Rate</div>
+                                <div class="text-sm font-bold text-white mt-0.5">${species.captureRate}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pokédex Story / Lore -->
+                <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300">Pokédex Entry & Background Story</h3>
+                        <span class="text-[11px] text-slate-400">Habitat: <strong class="text-slate-200">${species.habitat}</strong></span>
+                    </div>
+                    <p class="text-sm text-slate-200 leading-relaxed">${species.flavor}</p>
+                    ${customMythLore && customMythLore !== species.flavor ? `
+                        <div class="pt-2 border-t border-slate-800/80">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-300">Cosmic & Mythological Archive:</span>
+                            <p class="text-xs text-slate-300 leading-relaxed mt-1">${customMythLore}</p>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Abilities -->
+                <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Abilities</h3>
+                    <div class="flex flex-wrap gap-2">${abilitiesHtml || '<span class="text-xs text-slate-400">Standard</span>'}</div>
+                </div>
+
+                <!-- Base Stats -->
+                <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300">Base Stats</h3>
+                        <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
+                            Total BST: ${bst}
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        ${statsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // =====================================================================
+        // DYNAMIC QUIZ ENGINE — varied question templates + no immediate repeats
+        // =====================================================================
+        let quizScore = 0;
+        let quizStreak = 0;
+        let quizQuestionNumber = 0;
+        let quizCurrentQuestion = null;
+        const quizSeen = new Set();
+        const QUIZ_TYPES = ['image', 'types', 'regions', 'abilities', 'stats', 'dex'];
+        const REGION_NAMES = ['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova', 'Kalos', 'Alola', 'Galar & Hisui', 'Paldea'];
+
+        function randomItem(items) {
+            return items[Math.floor(Math.random() * items.length)];
+        }
+
+        function shuffled(items) {
+            return [...items].sort(() => Math.random() - 0.5);
+        }
+
+        function quizOptions(correct, pool, count = 4) {
+            const others = [...new Set(pool)].filter(value => value !== correct);
+            return shuffled([correct, ...shuffled(others).slice(0, count - 1)]);
+        }
+
+        async function nextQuizQuestion() {
+            const loading = document.getElementById('quiz-loading');
+            const content = document.getElementById('quiz-content');
+            const feedback = document.getElementById('quiz-feedback');
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+            feedback.classList.add('hidden');
+
+            if (!dexMasterList.length) {
+                loading.textContent = 'Loading National Pokédex...';
+                return;
+            }
+
+            const selectedCategory = document.getElementById('quiz-category').value;
+            const availableKinds = selectedCategory === 'mixed' ? QUIZ_TYPES : [selectedCategory];
+            let pokemon, kind, key;
+            for (let attempt = 0; attempt < 40; attempt++) {
+                pokemon = randomItem(dexMasterList);
+                kind = randomItem(availableKinds);
+                key = `${pokemon.id}:${kind}`;
+                if (!quizSeen.has(key)) break;
+            }
+            if (quizSeen.has(key)) quizSeen.clear();
+            quizSeen.add(key);
+            if (quizSeen.size > 120) quizSeen.delete(quizSeen.values().next().value);
+
+            let question, correct, options, label, art = false;
+
+            if (kind === 'image') {
+                correct = pokemon.name;
+                const namePool = shuffled(dexMasterList.filter(p => p.id !== pokemon.id))
+                    .slice(0, 12)
+                    .map(p => p.name);
+                options = quizOptions(correct, namePool, 4);
+                question = "Who's that Pokémon? Identify this Pokémon by its appearance:";
+                label = 'Guess by Image';
+                art = true;
+            } else {
+                const detail = await getPokemonFullData(pokemon.id);
+                if (!detail) {
+                    loading.textContent = 'Could not load the data. Check your connection and try again.';
+                    return;
+                }
+
+                const allTypes = ['Normal','Fire','Water','Grass','Electric','Ice','Fighting','Poison','Ground','Flying','Psychic','Bug','Rock','Ghost','Dragon','Dark','Steel','Fairy'];
+
+                if (kind === 'types') {
+                    correct = detail.types.join(' / ');
+                    const combos = dexMasterList.filter(p => p.id !== pokemon.id).slice(0, 100);
+                    const distractors = [];
+                    for (const other of shuffled(combos).slice(0, 25)) {
+                        const d = await getPokemonFullData(other.id);
+                        if (d) distractors.push(d.types.join(' / '));
+                        if (distractors.length >= 3) break;
+                    }
+                    options = quizOptions(correct, [...distractors, ...allTypes], 4);
+                    question = `Which types does ${pokemon.name} have?`;
+                    label = 'Types';
+                } else if (kind === 'regions') {
+                    correct = pokemon.region;
+                    options = quizOptions(correct, REGION_NAMES, 4);
+                    question = `Which region is ${pokemon.name} from?`;
+                    label = 'Regions';
+                    art = true;
+                } else if (kind === 'abilities') {
+                    const ability = randomItem(detail.abilities);
+                    correct = ability.name;
+                    const abilityPool = [];
+                    for (const id of shuffled([1,25,39,52,133,150,201,252,385,493,658,700,812,888,905,1000]).slice(0, 10)) {
+                        const d = await getPokemonFullData(id);
+                        if (d) abilityPool.push(...d.abilities.map(a => a.name));
+                    }
+                    options = quizOptions(correct, abilityPool, 4);
+                    question = `Which ability can ${pokemon.name} have?`;
+                    label = 'Abilities';
+                    art = true;
+                } else if (kind === 'stats') {
+                    const highest = [...detail.stats].sort((a,b) => b.value - a.value)[0];
+                    const labels = {
+                        'hp': 'HP',
+                        'attack': 'Attack',
+                        'defense': 'Defense',
+                        'special-attack': 'Sp. Atk',
+                        'special-defense': 'Sp. Def',
+                        'speed': 'Speed'
+                    };
+                    correct = labels[highest.name] || highest.name;
+                    options = quizOptions(correct, Object.values(labels), 4);
+                    question = `Which of ${pokemon.name}'s base stats is the highest?`;
+                    label = 'Stats';
+                    art = true;
+                } else {
+                    correct = `#${String(pokemon.id).padStart(4, '0')}`;
+                    const numbers = new Set([correct]);
+                    while (numbers.size < 4) {
+                        const n = Math.floor(Math.random() * 1025) + 1;
+                        numbers.add(`#${String(n).padStart(4, '0')}`);
+                    }
+                    options = shuffled([...numbers]);
+                    question = `What is ${pokemon.name}'s National Pokédex number?`;
+                    label = 'National Pokédex';
+                    art = true;
+                }
+            }
+
+            quizCurrentQuestion = { correct, pokemon, kind, answered: false };
+            quizQuestionNumber++;
+            document.getElementById('quiz-kind').textContent = label;
+            document.getElementById('quiz-progress').textContent = `Question ${quizQuestionNumber}`;
+            document.getElementById('quiz-question').textContent = question;
+
+            const artWrap = document.getElementById('quiz-art-wrap');
+            const artImg = document.getElementById('quiz-art');
+            artWrap.classList.toggle('hidden', !art);
+            if (art) {
+                const artUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+                const fallbackUrl = `https://placehold.co/180x180/0f172a/facc15?text=%23${pokemon.id}`;
+                artImg.alt = 'Mystery Pokémon';
+                artImg.onerror = () => {
+                    artImg.onerror = null;
+                    artImg.src = fallbackUrl;
+                };
+                artImg.src = artUrl;
+            }
+
+            const optionsWrap = document.getElementById('quiz-options');
+            optionsWrap.innerHTML = '';
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'quiz-option rounded-2xl border border-slate-700 bg-slate-900/90 hover:border-amber-400 hover:bg-amber-400/10 p-4 text-left text-sm font-semibold text-slate-100 transition';
+                button.textContent = option;
+                button.addEventListener('click', () => answerQuiz(option, button));
+                optionsWrap.appendChild(button);
+            });
+
+            document.getElementById('quiz-score').textContent = quizScore;
+            document.getElementById('quiz-streak').textContent = quizStreak;
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+        }
+
+        function answerQuiz(answer, selectedButton) {
+            if (!quizCurrentQuestion || quizCurrentQuestion.answered) return;
+            quizCurrentQuestion.answered = true;
+            const correct = answer === quizCurrentQuestion.correct;
+            if (correct) {
+                quizScore++;
+                quizStreak++;
+            } else {
+                quizStreak = 0;
+            }
+            document.querySelectorAll('.quiz-option').forEach(button => {
+                button.disabled = true;
+                button.classList.remove('hover:border-amber-400', 'hover:bg-amber-400/10');
+                if (button.textContent === quizCurrentQuestion.correct) {
+                    button.classList.add('border-emerald-400', 'bg-emerald-500/15', 'text-emerald-200');
+                } else if (button === selectedButton && !correct) {
+                    button.classList.add('border-rose-400', 'bg-rose-500/15', 'text-rose-200');
+                } else {
+                    button.classList.add('opacity-50');
+                }
+            });
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.className = `rounded-2xl p-4 text-sm ${correct ? 'bg-emerald-500/10 border border-emerald-400/30 text-emerald-200' : 'bg-rose-500/10 border border-rose-400/30 text-rose-200'}`;
+            feedback.textContent = correct
+                ? 'Correct! +1 point. You can move on to the next question.'
+                : `Not quite. The correct answer is: ${quizCurrentQuestion.correct}.`;
+            feedback.classList.remove('hidden');
+            document.getElementById('quiz-score').textContent = quizScore;
+            document.getElementById('quiz-streak').textContent = quizStreak;
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'mt-3 block rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-4 py-2 text-xs';
+            next.textContent = 'Next Question →';
+            next.addEventListener('click', nextQuizQuestion);
+            feedback.appendChild(next);
+        }
+
+        function initPokedexEvents() {
+            document.getElementById('mode-tree-btn').addEventListener('click', () => switchAppMode('tree'));
+            document.getElementById('mode-dex-btn').addEventListener('click', () => switchAppMode('dex'));
+            document.getElementById('mode-quiz-btn').addEventListener('click', () => switchAppMode('quiz'));
+            document.getElementById('quiz-new-btn').addEventListener('click', nextQuizQuestion);
+            document.getElementById('quiz-category').addEventListener('change', () => {
+                quizCurrentQuestion = null;
+                nextQuizQuestion();
+            });
+
+            const dexSearch = document.getElementById('dex-search-input');
+            const dexClear = document.getElementById('dex-clear-search');
+            let searchTimer = null;
+
+            dexSearch.addEventListener('input', () => {
+                dexSearchQuery = dexSearch.value;
+                dexClear.classList.toggle('hidden', !dexSearchQuery);
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => applyDexFilters(), 160);
+            });
+
+            dexClear.addEventListener('click', () => {
+                dexSearch.value = '';
+                dexSearchQuery = '';
+                dexClear.classList.add('hidden');
+                applyDexFilters();
+            });
+
+            document.getElementById('dex-type-filter').addEventListener('change', (e) => {
+                dexCurrentType = e.target.value;
+                applyDexFilters();
+            });
+
+            document.getElementById('dex-rarity-filter').addEventListener('change', (e) => {
+                dexCurrentRarity = e.target.value;
+                applyDexFilters();
+            });
+
+            document.getElementById('dex-load-more').addEventListener('click', renderNextDexBatch);
+
+            // Infinite scroll support inside Pokédex container
+            const dexView = document.getElementById('pokedex-view');
+            dexView.addEventListener('scroll', () => {
+                if (dexRenderedCount < dexFilteredList.length) {
+                    if (dexView.scrollTop + dexView.clientHeight >= dexView.scrollHeight - 400) {
+                        renderNextDexBatch();
+                    }
+                }
+            });
+
+            // Modal controls
+            const dexModal = document.getElementById('dex-modal');
+            document.getElementById('dex-close-modal').addEventListener('click', () => dexModal.classList.add('hidden'));
+            dexModal.addEventListener('click', (e) => {
+                if (e.target === dexModal) dexModal.classList.add('hidden');
+            });
+
+            document.getElementById('dex-prev-btn').addEventListener('click', () => {
+                const prevId = dexActiveId > 1 ? dexActiveId - 1 : 1025;
+                openDexModal(prevId);
+            });
+
+            document.getElementById('dex-next-btn').addEventListener('click', () => {
+                const nextId = dexActiveId < 1025 ? dexActiveId + 1 : 1;
+                openDexModal(nextId);
+            });
+
+            document.getElementById('dex-shiny-toggle').addEventListener('click', () => {
+                dexShinyMode = !dexShinyMode;
+                document.getElementById('dex-shiny-label').textContent = `Shiny: ${dexShinyMode ? 'ON' : 'OFF'}`;
+                openDexModal(dexActiveId);
+            });
+        }
+
+        window.onload = function () {
+            initStarfield();
+            renderRegions();
+            renderConnections();
+            renderNodes();
+            initInteractions();
+            initPokedexEvents();
+            focusRegion('all');
+        };
+    </script>
+</body>
+</html>
