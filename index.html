@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Cosmic Pokémon Genealogical & Mythological Tree</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,8 +25,10 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            min-height: 100%;
+            height: 100%;
+            min-height: 100dvh;
             overflow: hidden;
+            overscroll-behavior: none;
             background-color: #050811;
             font-family: 'Inter', sans-serif;
             color: #f8fafc;
@@ -54,6 +56,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             cursor: grab;
             z-index: 5;
@@ -245,6 +248,10 @@
             filter: drop-shadow(0 0 7px currentColor);
         }
 
+        .custom-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+
         .custom-scroll::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -284,6 +291,32 @@
             outline-offset: -2px;
             background-color: rgba(250, 204, 21, 0.22) !important;
         }
+
+        /* Mobile-only ergonomics & performance optimizations (desktop unchanged) */
+        @media (max-width: 767px) {
+            .region-box {
+                backdrop-filter: none;
+                background: rgba(12, 18, 36, 0.65);
+            }
+            .poke-node:hover {
+                transform: translate(-50%, -50%);
+            }
+            input, select {
+                font-size: 16px !important; /* Prevents iOS Safari auto-zoom on focus */
+            }
+            #tree-bottom-nav {
+                bottom: max(0.65rem, env(safe-area-inset-bottom));
+            }
+            #tree-zoom-controls {
+                bottom: calc(3.6rem + env(safe-area-inset-bottom));
+            }
+            #pokedex-view,
+            #quiz-view,
+            #type-chart-view {
+                padding-top: 8.25rem;
+                padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+            }
+        }
     </style>
 </head>
 <body class="cosmic-backdrop">
@@ -291,16 +324,16 @@
     <canvas id="starfield"></canvas>
 
     <!-- Top Navigation, Search, Category Filter & Connection Legend -->
-    <header class="fixed top-3 left-3 right-3 z-40 flex flex-col xl:flex-row xl:items-start xl:justify-between gap-2.5 pointer-events-none">
+    <header id="main-header" class="fixed top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 z-40 flex flex-col xl:flex-row xl:items-start xl:justify-between gap-2 sm:gap-2.5 pointer-events-none">
         <!-- Left Cluster: Title + Search + Category Filter Pills -->
-        <div class="flex flex-col gap-2 pointer-events-auto">
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="bg-slate-950/88 backdrop-blur-md border border-amber-400/35 rounded-2xl px-4 py-2 shadow-2xl flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-200 flex items-center justify-center text-slate-950 font-black shadow-md">
+        <div class="flex flex-col gap-1.5 sm:gap-2 pointer-events-auto max-w-full">
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <div class="bg-slate-950/88 backdrop-blur-md border border-amber-400/35 rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 shadow-2xl flex items-center gap-2.5 sm:gap-3">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-200 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
                         ✦
                     </div>
                     <div>
-                        <h1 class="font-myth text-sm sm:text-base font-bold tracking-wider text-amber-200 leading-tight">
+                        <h1 class="font-myth text-xs sm:text-base font-bold tracking-wider text-amber-200 leading-tight">
                             COSMIC POKÉMON ENCYCLOPEDIA
                         </h1>
                         <p class="text-[11px] text-slate-400 hidden sm:block">Mythological Lineage Tree, 1,025 National Pokédex & Type Matrix</p>
@@ -308,32 +341,32 @@
                 </div>
 
                 <!-- Primary Mode / Tab Switcher -->
-                <div class="bg-slate-950/92 backdrop-blur-md border border-slate-700/90 p-1 rounded-2xl shadow-2xl flex flex-wrap items-center gap-1">
-                    <button id="mode-tree-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md transition flex items-center gap-1.5">
+                <div class="bg-slate-950/92 backdrop-blur-md border border-slate-700/90 p-1 rounded-2xl shadow-2xl flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
+                    <button id="mode-tree-btn" class="px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md transition flex items-center gap-1.5 shrink-0">
                         <span>✦</span>
                         <span>Genealogy Tree</span>
                     </button>
-                    <button id="mode-dex-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                    <button id="mode-dex-btn" class="px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 shrink-0">
                         <span>◉</span>
                         <span>National Pokédex (1,025)</span>
                     </button>
-                    <button id="mode-quiz-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                    <button id="mode-quiz-btn" class="px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 shrink-0">
                         <span>✧</span>
                         <span>Pokémon Quiz</span>
                     </button>
-                    <button id="mode-types-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                    <button id="mode-types-btn" class="px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 shrink-0">
                         <span>❖</span>
                         <span>Type Chart</span>
                     </button>
                 </div>
 
                 <!-- Tree Search Bar -->
-                <div id="tree-search-wrap" class="relative flex-1 sm:flex-initial min-w-[210px] sm:w-64">
+                <div id="tree-search-wrap" class="relative flex-1 sm:flex-initial min-w-[180px] sm:w-64">
                     <input 
                         type="text" 
                         id="search-input" 
                         placeholder="Search tree Pokémon, UB, or role..." 
-                        class="w-full bg-slate-950/88 backdrop-blur-md border border-slate-700/80 focus:border-amber-400 rounded-2xl pl-9 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-400 outline-none shadow-2xl transition"
+                        class="w-full bg-slate-950/88 backdrop-blur-md border border-slate-700/80 focus:border-amber-400 rounded-2xl pl-9 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm text-white placeholder-slate-400 outline-none shadow-2xl transition"
                     >
                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -344,62 +377,62 @@
             </div>
 
             <!-- Category Filter Pills (Tree Mode) -->
-            <div id="tree-cat-bar" class="flex flex-wrap items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 p-1.5 rounded-2xl shadow-xl self-start">
-                <button data-cat="all" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-bold bg-amber-400 text-slate-950 transition">
+            <div id="tree-cat-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full bg-slate-950/85 backdrop-blur-md border border-slate-800/90 p-1.5 rounded-2xl shadow-xl self-start">
+                <button data-cat="all" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap bg-amber-400 text-slate-950 transition shrink-0">
                     All Entities (<span id="count-all">0</span>)
                 </button>
-                <button data-cat="Legendary" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-sky-200 hover:bg-white/10 transition">
+                <button data-cat="Legendary" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold whitespace-nowrap text-sky-200 hover:bg-white/10 transition shrink-0">
                     Legendaries (<span id="count-leg">0</span>)
                 </button>
-                <button data-cat="Mythical" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-pink-200 hover:bg-white/10 transition">
+                <button data-cat="Mythical" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold whitespace-nowrap text-pink-200 hover:bg-white/10 transition shrink-0">
                     Mythicals (<span id="count-myth">0</span>)
                 </button>
-                <button data-cat="Ultra Beast" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold text-purple-200 hover:bg-white/10 transition">
+                <button data-cat="Ultra Beast" class="cat-btn px-3 py-1 rounded-xl text-[11px] font-semibold whitespace-nowrap text-purple-200 hover:bg-white/10 transition shrink-0">
                     Ultra Beasts (<span id="count-ub">0</span>)
                 </button>
             </div>
         </div>
 
         <!-- Right Cluster: Connection Legend (Tree Mode) -->
-        <div id="tree-legend-box" class="pointer-events-auto self-end xl:self-auto bg-slate-950/88 backdrop-blur-md border border-slate-700/80 rounded-2xl px-3.5 py-2.5 shadow-2xl">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5 flex items-center justify-between gap-4">
-                <span>Lineage Legend (Click to Filter)</span>
+        <div id="tree-legend-box" class="pointer-events-auto self-stretch sm:self-end xl:self-auto bg-slate-950/88 backdrop-blur-md border border-slate-700/80 rounded-2xl px-3 sm:px-3.5 py-2 sm:py-2.5 shadow-2xl">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 sm:mb-1.5 flex items-center justify-between gap-4">
+                <span>Lineage Legend (Tap to Filter)</span>
                 <button id="reset-filter-btn" class="hidden text-amber-400 hover:underline text-[10px] font-bold">Reset Filters</button>
             </div>
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold">
-                <button data-rel="created" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
-                    <span class="w-5 h-1 rounded-full bg-[#facc15] shadow-[0_0_8px_#facc15]"></span>
-                    <span class="text-amber-200 text-[11px] tracking-wide">CREATED / ORIGIN</span>
+                <button data-rel="created" class="legend-btn flex items-center gap-2 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-4 sm:w-5 h-1 rounded-full bg-[#facc15] shadow-[0_0_8px_#facc15] shrink-0"></span>
+                    <span class="text-amber-200 text-[10px] sm:text-[11px] tracking-wide truncate">CREATED / ORIGIN</span>
                 </button>
-                <button data-rel="related" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
-                    <span class="w-5 h-1 rounded-full bg-[#38bdf8] shadow-[0_0_8px_#38bdf8]"></span>
-                    <span class="text-sky-200 text-[11px] tracking-wide">RELATED / DUO / TRIO</span>
+                <button data-rel="related" class="legend-btn flex items-center gap-2 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-4 sm:w-5 h-1 rounded-full bg-[#38bdf8] shadow-[0_0_8px_#38bdf8] shrink-0"></span>
+                    <span class="text-sky-200 text-[10px] sm:text-[11px] tracking-wide truncate">RELATED / DUO / TRIO</span>
                 </button>
-                <button data-rel="controls" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
-                    <span class="w-5 h-1 rounded-full bg-[#f87171] shadow-[0_0_8px_#f87171]"></span>
-                    <span class="text-rose-200 text-[11px] tracking-wide">CONTROLS / MASTER</span>
+                <button data-rel="controls" class="legend-btn flex items-center gap-2 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-4 sm:w-5 h-1 rounded-full bg-[#f87171] shadow-[0_0_8px_#f87171] shrink-0"></span>
+                    <span class="text-rose-200 text-[10px] sm:text-[11px] tracking-wide truncate">CONTROLS / MASTER</span>
                 </button>
-                <button data-rel="cloned" class="legend-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
-                    <span class="w-5 h-0.5 border-t-2 border-dashed border-[#e879f9]"></span>
-                    <span class="text-fuchsia-200 text-[11px] tracking-wide">CLONE / FORM / PARADOX</span>
+                <button data-rel="cloned" class="legend-btn flex items-center gap-2 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-white/10 transition text-left">
+                    <span class="w-4 sm:w-5 h-0.5 border-t-2 border-dashed border-[#e879f9] shrink-0"></span>
+                    <span class="text-fuchsia-200 text-[10px] sm:text-[11px] tracking-wide truncate">CLONE / FORM / PARADOX</span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Bottom Quick-Jump Region & Group Bar -->
-    <nav id="tree-bottom-nav" class="fixed bottom-3 left-3 right-3 sm:right-auto sm:max-w-[calc(100vw-210px)] z-40 pointer-events-auto">
+    <nav id="tree-bottom-nav" class="fixed bottom-3 left-2 sm:left-3 right-2 sm:right-auto sm:max-w-[calc(100vw-210px)] z-40 pointer-events-auto">
         <div id="region-bar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-slate-950/88 backdrop-blur-md border border-slate-700/80 p-1.5 rounded-2xl shadow-2xl">
             <!-- Populated by JS -->
         </div>
     </nav>
 
     <!-- Zoom & Fit-to-Screen Controls -->
-    <div id="tree-zoom-controls" class="fixed bottom-16 sm:bottom-3 right-3 z-40 flex sm:flex-row flex-col items-center gap-1.5 bg-slate-950/88 backdrop-blur-md border border-slate-700/80 p-1.5 rounded-2xl shadow-2xl pointer-events-auto">
+    <div id="tree-zoom-controls" class="fixed bottom-16 sm:bottom-3 right-2 sm:right-3 z-40 flex sm:flex-row flex-col items-center gap-1.5 bg-slate-950/88 backdrop-blur-md border border-slate-700/80 p-1.5 rounded-2xl shadow-2xl pointer-events-auto">
         <button id="zoom-in" title="Zoom In" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 flex items-center justify-center font-bold text-lg transition">+</button>
         <span id="zoom-level" class="text-[11px] font-mono text-slate-300 px-1.5 min-w-[44px] text-center">42%</span>
         <button id="zoom-out" title="Zoom Out" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-amber-500/20 hover:text-amber-300 border border-slate-700 flex items-center justify-center font-bold text-lg transition">−</button>
-        <button id="zoom-reset" title="Fit Entire Tree to Screen" class="px-2.5 h-9 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold transition">Fit Screen</button>
+        <button id="zoom-reset" title="Fit Entire Tree to Screen" class="px-2.5 h-9 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/40 text-xs font-semibold transition">Fit</button>
     </div>
 
     <!-- Interactive Cosmic Canvas -->
@@ -667,7 +700,7 @@
                         <span class="text-sky-300 font-bold text-sm">🛡️ Defending Type (Columns)</span>
                     </div>
                     <div id="tc-hover-readout" class="text-xs font-semibold text-slate-300 bg-slate-950/90 border border-slate-800 px-3 py-1 rounded-full">
-                        Hover any cell to inspect exact Attack → Defense multiplier
+                        Hover or tap any cell to inspect exact Attack → Defense multiplier
                     </div>
                 </div>
 
@@ -682,15 +715,15 @@
 
     <!-- Pokédex Entry Inspector Modal -->
     <div id="dex-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
-        <div class="bg-slate-950 border border-amber-400/40 rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col">
+        <div class="bg-slate-950 border border-amber-400/40 rounded-3xl w-full max-w-3xl max-h-[90dvh] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] flex flex-col">
             <!-- Modal Header -->
-            <div class="px-5 py-3.5 border-b border-slate-800/90 flex items-center justify-between gap-2 bg-slate-900/60">
-                <div class="flex items-center gap-2">
-                    <button id="dex-prev-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">← Prev</button>
-                    <button id="dex-next-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">Next →</button>
+            <div class="px-4 sm:px-5 py-3.5 border-b border-slate-800/90 flex items-center justify-between gap-2 bg-slate-900/60">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button id="dex-prev-btn" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">← Prev</button>
+                    <button id="dex-next-btn" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">Next →</button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button id="dex-shiny-toggle" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                    <button id="dex-shiny-toggle" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-400/40 text-xs font-bold transition flex items-center gap-1.5">
                         <span>✨</span>
                         <span id="dex-shiny-label">Shiny: OFF</span>
                     </button>
@@ -699,7 +732,7 @@
             </div>
 
             <!-- Modal Body -->
-            <div id="dex-modal-body" class="flex-1 overflow-y-auto custom-scroll p-5 sm:p-6 space-y-5">
+            <div id="dex-modal-body" class="flex-1 overflow-y-auto custom-scroll p-4 sm:p-6 space-y-5">
                 <!-- Populated dynamically -->
             </div>
         </div>
@@ -715,14 +748,14 @@
             <button id="close-detail" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 flex items-center justify-center text-slate-300 transition">✕</button>
         </div>
 
-        <div id="detail-content" class="flex-1 overflow-y-auto custom-scroll p-5 space-y-5">
+        <div id="detail-content" class="flex-1 overflow-y-auto custom-scroll p-4 sm:p-5 space-y-5">
             <!-- Populated dynamically -->
         </div>
     </aside>
 
     <!-- Navigation Hint Toast -->
-    <div id="hint-toast" class="fixed top-28 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-amber-400/40 text-amber-100 text-xs px-4 py-2 rounded-full shadow-xl pointer-events-none transition-opacity duration-500">
-        Drag to pan • Scroll or pinch to zoom • Click any Pokémon to explore its mythological lore
+    <div id="hint-toast" class="fixed top-44 sm:top-28 left-1/2 -translate-x-1/2 z-30 bg-slate-900/90 border border-amber-400/40 text-amber-100 text-[11px] sm:text-xs px-3.5 sm:px-4 py-2 rounded-full shadow-xl pointer-events-none transition-opacity duration-500 text-center max-w-[92vw]">
+        Drag to pan • Pinch or scroll to zoom • Tap any Pokémon for lore
     </div>
 
     <script>
@@ -1691,6 +1724,24 @@
             return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
         }
 
+        // Dynamic top padding adjustment so mobile header never overlaps sub-views
+        function syncSubViewTopPadding() {
+            const header = document.getElementById('main-header');
+            if (!header) return;
+            const h = header.offsetHeight;
+            if (h > 0) {
+                const pad = `${h + 12}px`;
+                ['pokedex-view', 'quiz-view', 'type-chart-view'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && window.innerWidth < 768) {
+                        el.style.paddingTop = pad;
+                    } else if (el) {
+                        el.style.paddingTop = '';
+                    }
+                });
+            }
+        }
+
         // 1. Twinkling Cosmic Starfield
         function initStarfield() {
             const canvas = document.getElementById('starfield');
@@ -1704,7 +1755,8 @@
                 canvas.style.width = window.innerWidth + 'px';
                 canvas.style.height = window.innerHeight + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                const count = Math.min(220, Math.floor((window.innerWidth * window.innerHeight) / 8500));
+                const maxStars = window.innerWidth < 768 ? 90 : 220;
+                const count = Math.min(maxStars, Math.floor((window.innerWidth * window.innerHeight) / 8500));
                 stars = Array.from({ length: count }, () => ({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
@@ -1712,6 +1764,7 @@
                     alpha: Math.random() * 0.8 + 0.2,
                     speed: (Math.random() - 0.5) * 0.015
                 }));
+                syncSubViewTopPadding();
             }
 
             function draw() {
@@ -1890,7 +1943,7 @@
 
             document.querySelectorAll('.cat-btn').forEach(btn => {
                 const isMatch = btn.dataset.cat === activeCatFilter;
-                btn.className = `cat-btn px-3 py-1 rounded-xl text-[11px] font-bold transition ${
+                btn.className = `cat-btn px-3 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition shrink-0 ${
                     isMatch
                         ? 'bg-amber-400 text-slate-950 shadow'
                         : 'text-slate-200 hover:bg-white/10'
@@ -1919,6 +1972,7 @@
                 const matchesRel = !activeRelFilter || relConnectedIds.has(id);
                 node.classList.toggle('dimmed', !(matchesCat && matchesRel));
             });
+            syncSubViewTopPadding();
         }
 
         // 7. Side Encyclopedia Drawer
@@ -2007,12 +2061,12 @@
         // 8. Camera Pan & Zoom Engine
         function applyTransform(smooth = false) {
             worldEl.style.transition = smooth ? 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)' : 'none';
-            worldEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            worldEl.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${scale})`;
             zoomLevelEl.textContent = `${Math.round(scale * 100)}%`;
         }
 
         function centerOnPoint(worldX, worldY, targetScale = scale) {
-            scale = Math.min(Math.max(targetScale, 0.22), 1.75);
+            scale = Math.min(Math.max(targetScale, 0.18), 1.75);
             panX = window.innerWidth / 2 - worldX * scale;
             panY = window.innerHeight / 2 - worldY * scale;
             applyTransform(true);
@@ -2038,7 +2092,8 @@
             if (regionId === 'all') {
                 const fitScaleX = (window.innerWidth - 40) / 4800;
                 const fitScaleY = (window.innerHeight - 140) / 3050;
-                const fitScale = Math.max(Math.min(fitScaleX, fitScaleY), 0.24);
+                const minFit = window.innerWidth < 768 ? 0.18 : 0.24;
+                const fitScale = Math.max(Math.min(fitScaleX, fitScaleY), minFit);
                 centerOnPoint(2400, 1520, fitScale);
             } else {
                 const mobileFactor = window.innerWidth < 768 ? 0.65 : 1;
@@ -2102,7 +2157,7 @@
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
-                    const newScale = Math.min(Math.max(initialScale * (dist / initialPinchDist), 0.22), 1.75);
+                    const newScale = Math.min(Math.max(initialScale * (dist / initialPinchDist), 0.18), 1.75);
                     const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
                     const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
                     panX = midX - ((midX - panX) / scale) * newScale;
@@ -2122,7 +2177,7 @@
                 e.preventDefault();
                 hideHint();
                 const zoomFactor = e.deltaY < 0 ? 1.13 : 0.88;
-                const newScale = Math.min(Math.max(scale * zoomFactor, 0.22), 1.75);
+                const newScale = Math.min(Math.max(scale * zoomFactor, 0.18), 1.75);
                 panX = e.clientX - ((e.clientX - panX) / scale) * newScale;
                 panY = e.clientY - ((e.clientY - panY) / scale) * newScale;
                 scale = newScale;
@@ -2360,7 +2415,7 @@
             ];
             modes.forEach(([id, active]) => {
                 const btn = document.getElementById(id);
-                btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide transition flex items-center gap-1.5 ${
+                btn.className = `px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap transition flex items-center gap-1.5 shrink-0 ${
                     active ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md' : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`;
             });
@@ -2375,6 +2430,8 @@
             document.getElementById('pokedex-view').classList.toggle('hidden', !isDex);
             document.getElementById('quiz-view').classList.toggle('hidden', !isQuiz);
             document.getElementById('type-chart-view').classList.toggle('hidden', !isTypes);
+
+            syncSubViewTopPadding();
 
             if ((isDex || isQuiz) && dexMasterList.length === 0) {
                 initNationalPokedex().then(() => {
@@ -2728,7 +2785,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center bg-gradient-to-br from-slate-900/95 via-slate-950 to-slate-900/90 p-5 rounded-3xl border border-slate-800">
                     <div class="md:col-span-5 flex flex-col items-center justify-center relative">
                         <div class="w-44 h-44 rounded-full bg-amber-400/10 blur-2xl absolute"></div>
-                        <img src="${artUrl}" alt="${meta.name}" onerror="this.onerror=null;this.src='${normalFallback}';" class="w-44 h-44 sm:w-48 sm:h-48 object-contain relative z-10 drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)]">
+                        <img src="${artUrl}" alt="${meta.name}" onerror="this.onerror=null;this.src='${normalFallback}';" class="w-40 h-40 sm:w-48 sm:h-48 object-contain relative z-10 drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)]">
                     </div>
                     <div class="md:col-span-7 space-y-3 text-center md:text-left">
                         <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
@@ -2769,7 +2826,7 @@
 
                 <!-- Pokédex Story / Lore -->
                 <div class="bg-slate-900/75 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between gap-2">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-amber-300">Pokédex Entry & Background Story</h3>
                         <span class="text-[11px] text-slate-400">Habitat: <strong class="text-slate-200">${species.habitat}</strong></span>
                     </div>
@@ -3303,29 +3360,36 @@
 
             table.innerHTML = theadHtml + tbodyHtml;
 
-            // Crosshair Hover Effects
+            // Crosshair Hover & Tap Effects
+            const highlightCell = (cell) => {
+                table.querySelectorAll('.tc-row-active').forEach(el => el.classList.remove('tc-row-active'));
+                table.querySelectorAll('.tc-col-active').forEach(el => el.classList.remove('tc-col-active'));
+                table.querySelectorAll('.tc-cell-focus').forEach(el => el.classList.remove('tc-cell-focus'));
+
+                const r = cell.dataset.row;
+                const c = cell.dataset.col;
+                const atk = cell.dataset.atk;
+                const def = cell.dataset.def;
+                const mult = parseFloat(cell.dataset.mult);
+
+                table.querySelectorAll(`.tc-row[data-row="${r}"]`).forEach(el => el.classList.add('tc-row-active'));
+                table.querySelectorAll(`[data-col="${c}"]`).forEach(el => el.classList.add('tc-col-active'));
+                cell.classList.add('tc-cell-focus');
+
+                const multLabel = mult === 2
+                    ? '<span class="text-emerald-300 font-extrabold">2× (Super Effective!)</span>'
+                    : mult === 0.5
+                        ? '<span class="text-rose-300 font-bold">½× (Not Very Effective)</span>'
+                        : mult === 0
+                            ? '<span class="text-slate-400 font-bold">0× (No Effect / Immune)</span>'
+                            : '<span class="text-slate-300 font-semibold">1× (Normal Damage)</span>';
+
+                readout.innerHTML = `<span class="text-amber-300 font-bold">${atk}</span> move vs <span class="text-sky-300 font-bold">${def}</span> Pokémon → ${multLabel}`;
+            };
+
             table.querySelectorAll('.tc-cell').forEach(cell => {
-                cell.addEventListener('mouseenter', () => {
-                    const r = cell.dataset.row;
-                    const c = cell.dataset.col;
-                    const atk = cell.dataset.atk;
-                    const def = cell.dataset.def;
-                    const mult = parseFloat(cell.dataset.mult);
-
-                    table.querySelectorAll(`.tc-row[data-row="${r}"]`).forEach(el => el.classList.add('tc-row-active'));
-                    table.querySelectorAll(`[data-col="${c}"]`).forEach(el => el.classList.add('tc-col-active'));
-                    cell.classList.add('tc-cell-focus');
-
-                    const multLabel = mult === 2
-                        ? '<span class="text-emerald-300 font-extrabold">2× (Super Effective!)</span>'
-                        : mult === 0.5
-                            ? '<span class="text-rose-300 font-bold">½× (Not Very Effective)</span>'
-                            : mult === 0
-                                ? '<span class="text-slate-400 font-bold">0× (No Effect / Immune)</span>'
-                                : '<span class="text-slate-300 font-semibold">1× (Normal Damage)</span>';
-
-                    readout.innerHTML = `<span class="text-amber-300 font-bold">${atk}</span> move vs <span class="text-sky-300 font-bold">${def}</span> Pokémon → ${multLabel}`;
-                });
+                cell.addEventListener('mouseenter', () => highlightCell(cell));
+                cell.addEventListener('click', () => highlightCell(cell));
 
                 cell.addEventListener('mouseleave', () => {
                     table.querySelectorAll('.tc-row-active').forEach(el => el.classList.remove('tc-row-active'));
@@ -3442,7 +3506,9 @@
             initPokedexEvents();
             initTypeChart();
             focusRegion('all');
+            syncSubViewTopPadding();
         };
     </script>
 </body>
 </html>
+```[cite: 1]
