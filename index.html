@@ -268,6 +268,22 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Type Chart Crosshair & Selection Highlighting */
+        .tc-row-active {
+            background-color: rgba(250, 204, 21, 0.1) !important;
+        }
+        .tc-col-active {
+            background-color: rgba(56, 189, 248, 0.11) !important;
+        }
+        .tc-selected-highlight {
+            background-color: rgba(250, 204, 21, 0.14) !important;
+        }
+        .tc-cell-focus {
+            outline: 2px solid rgba(250, 204, 21, 0.9);
+            outline-offset: -2px;
+            background-color: rgba(250, 204, 21, 0.22) !important;
+        }
     </style>
 </head>
 <body class="cosmic-backdrop">
@@ -287,12 +303,12 @@
                         <h1 class="font-myth text-sm sm:text-base font-bold tracking-wider text-amber-200 leading-tight">
                             COSMIC POKÉMON ENCYCLOPEDIA
                         </h1>
-                        <p class="text-[11px] text-slate-400 hidden sm:block">Mythological Lineage Tree & Complete 1,025 National Pokédex</p>
+                        <p class="text-[11px] text-slate-400 hidden sm:block">Mythological Lineage Tree, 1,025 National Pokédex & Type Matrix</p>
                     </div>
                 </div>
 
                 <!-- Primary Mode / Tab Switcher -->
-                <div class="bg-slate-950/92 backdrop-blur-md border border-slate-700/90 p-1 rounded-2xl shadow-2xl flex items-center gap-1">
+                <div class="bg-slate-950/92 backdrop-blur-md border border-slate-700/90 p-1 rounded-2xl shadow-2xl flex flex-wrap items-center gap-1">
                     <button id="mode-tree-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md transition flex items-center gap-1.5">
                         <span>✦</span>
                         <span>Genealogy Tree</span>
@@ -304,6 +320,10 @@
                     <button id="mode-quiz-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
                         <span>✧</span>
                         <span>Pokémon Quiz</span>
+                    </button>
+                    <button id="mode-types-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold tracking-wide text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5">
+                        <span>❖</span>
+                        <span>Type Chart</span>
                     </button>
                 </div>
 
@@ -537,6 +557,126 @@
                 </div>
             </div>
             <p class="text-center text-[11px] text-slate-500">Type, ability, and stat data is retrieved from PokéAPI. Some questions require an internet connection.</p>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         FOURTH VIEW: COMPLETE 18-TYPE EFFECTIVENESS CHART & DUAL-TYPE CALCULATOR
+         ===================================================================== -->
+    <section id="type-chart-view" class="hidden fixed inset-0 z-20 pt-28 sm:pt-24 pb-8 px-3 sm:px-6 overflow-y-auto custom-scroll">
+        <div class="max-w-[1600px] mx-auto space-y-5">
+            <!-- Header & Dual-Type Calculator / Single-Type Inspector -->
+            <div class="rounded-3xl border border-amber-400/30 bg-slate-950/88 backdrop-blur-xl p-5 sm:p-6 shadow-2xl space-y-5">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-[.25em] text-amber-300 font-bold">Battle Synergy & Elemental Matchups</p>
+                        <h2 class="font-myth text-2xl sm:text-3xl text-white font-black mt-1">Pokémon Type Effectiveness Chart</h2>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                            Complete 18-Type Offensive &amp; Defensive Matchup Matrix &amp; Dual-Type Calculator
+                        </p>
+                    </div>
+
+                    <!-- Interactive Legend -->
+                    <div class="flex flex-wrap items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 text-xs">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 font-extrabold">
+                            2× <span class="font-semibold text-[11px] text-emerald-200">Super Effective</span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-400/40 font-bold">
+                            ½× <span class="font-semibold text-[11px] text-rose-200">Not Very Effective</span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 text-slate-400 border border-slate-700 font-bold">
+                            0× <span class="font-semibold text-[11px] text-slate-300">No Effect</span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 text-slate-500 border border-slate-800 font-semibold">
+                            1× <span class="text-[11px] text-slate-400">Normal Damage</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Two-Column Interactive Tools: Single-Type Breakdown + Dual-Type Calculator -->
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+                    <!-- Left: Single-Type Breakdown & Matrix Highlighter -->
+                    <div class="xl:col-span-6 rounded-2xl bg-slate-900/80 border border-slate-800 p-4 space-y-3.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-300">Single-Type Matchup Inspector</h3>
+                                <p class="text-[11px] text-slate-400">Select or click any type badge to highlight its row &amp; column and inspect strengths &amp; weaknesses.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select id="tc-single-select" class="bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold text-white outline-none cursor-pointer">
+                                    <!-- Populated by JS -->
+                                </select>
+                                <button id="tc-clear-highlight" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-300 border border-slate-700 transition">
+                                    Clear Matrix
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Type Pill Selector -->
+                        <div id="tc-type-pills" class="flex flex-wrap gap-1.5">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <!-- Single-Type Offensive & Defensive Breakdown -->
+                        <div id="tc-single-breakdown" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Dual-Type Defensive Matchup Calculator -->
+                    <div class="xl:col-span-6 rounded-2xl bg-slate-900/80 border border-slate-800 p-4 space-y-3.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-300">Interactive Dual-Type Defensive Calculator</h3>
+                                <p class="text-[11px] text-slate-400">Combine any two Pokémon types to compute exact incoming damage multipliers (4×, 2×, 1×, ½×, ¼×, 0×).</p>
+                            </div>
+                            <button id="tc-swap-types" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 text-[11px] font-bold text-slate-300 border border-slate-700 transition">
+                                ⇄ Swap
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div>
+                                <label for="tc-dual-primary" class="block text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Primary Type</label>
+                                <select id="tc-dual-primary" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none cursor-pointer">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tc-dual-secondary" class="block text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Secondary Type (Optional)</label>
+                                <select id="tc-dual-secondary" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none cursor-pointer">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Combined Defensive Multipliers Output -->
+                        <div id="tc-dual-results" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete 18x18 Effectiveness Matrix Table -->
+            <div class="rounded-3xl border border-slate-800 bg-slate-950/92 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-2 bg-slate-900/60">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-300 font-bold text-sm">⚔️ Attacking Type (Rows)</span>
+                        <span class="text-slate-500">→</span>
+                        <span class="text-sky-300 font-bold text-sm">🛡️ Defending Type (Columns)</span>
+                    </div>
+                    <div id="tc-hover-readout" class="text-xs font-semibold text-slate-300 bg-slate-950/90 border border-slate-800 px-3 py-1 rounded-full">
+                        Hover any cell to inspect exact Attack → Defense multiplier
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scroll relative max-h-[68vh]">
+                    <table id="tc-matrix-table" class="w-full border-collapse text-center text-xs select-none">
+                        <!-- Populated dynamically by JS -->
+                    </table>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -2210,10 +2350,13 @@
         function switchAppMode(mode) {
             const isTree = mode === 'tree';
             const isDex = mode === 'dex';
+            const isQuiz = mode === 'quiz';
+            const isTypes = mode === 'types';
             const modes = [
                 ['mode-tree-btn', isTree],
                 ['mode-dex-btn', isDex],
-                ['mode-quiz-btn', mode === 'quiz']
+                ['mode-quiz-btn', isQuiz],
+                ['mode-types-btn', isTypes]
             ];
             modes.forEach(([id, active]) => {
                 const btn = document.getElementById(id);
@@ -2230,13 +2373,14 @@
             document.getElementById('tree-zoom-controls').classList.toggle('hidden', !isTree);
             document.getElementById('hint-toast').classList.toggle('hidden', !isTree);
             document.getElementById('pokedex-view').classList.toggle('hidden', !isDex);
-            document.getElementById('quiz-view').classList.toggle('hidden', mode !== 'quiz');
+            document.getElementById('quiz-view').classList.toggle('hidden', !isQuiz);
+            document.getElementById('type-chart-view').classList.toggle('hidden', !isTypes);
 
-            if ((isDex || mode === 'quiz') && dexMasterList.length === 0) {
+            if ((isDex || isQuiz) && dexMasterList.length === 0) {
                 initNationalPokedex().then(() => {
-                    if (mode === 'quiz') nextQuizQuestion();
+                    if (isQuiz) nextQuizQuestion();
                 });
-            } else if (mode === 'quiz' && !quizCurrentQuestion) {
+            } else if (isQuiz && !quizCurrentQuestion) {
                 nextQuizQuestion();
             }
         }
@@ -2862,10 +3006,363 @@
             feedback.appendChild(next);
         }
 
+        // =====================================================================
+        // COMPLETE 18-TYPE EFFECTIVENESS CHART & DUAL-TYPE CALCULATOR ENGINE
+        // =====================================================================
+        const ALL_18_TYPES = [
+            'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice',
+            'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
+            'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy'
+        ];
+
+        // Offensive multipliers: TYPE_CHART[attackingType][defendingType]
+        const TYPE_CHART = {
+            Normal:   { Normal: 1, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 1, Poison: 1, Ground: 1, Flying: 1, Psychic: 1, Bug: 1, Rock: 0.5, Ghost: 0, Dragon: 1, Dark: 1, Steel: 0.5, Fairy: 1 },
+            Fire:     { Normal: 1, Fire: 0.5, Water: 0.5, Electric: 1, Grass: 2, Ice: 2, Fighting: 1, Poison: 1, Ground: 1, Flying: 1, Psychic: 1, Bug: 2, Rock: 0.5, Ghost: 1, Dragon: 0.5, Dark: 1, Steel: 2, Fairy: 1 },
+            Water:    { Normal: 1, Fire: 2, Water: 0.5, Electric: 1, Grass: 0.5, Ice: 1, Fighting: 1, Poison: 1, Ground: 2, Flying: 1, Psychic: 1, Bug: 1, Rock: 2, Ghost: 1, Dragon: 0.5, Dark: 1, Steel: 1, Fairy: 1 },
+            Electric: { Normal: 1, Fire: 1, Water: 2, Electric: 0.5, Grass: 0.5, Ice: 1, Fighting: 1, Poison: 1, Ground: 0, Flying: 2, Psychic: 1, Bug: 1, Rock: 1, Ghost: 1, Dragon: 0.5, Dark: 1, Steel: 1, Fairy: 1 },
+            Grass:    { Normal: 1, Fire: 0.5, Water: 2, Electric: 1, Grass: 0.5, Ice: 1, Fighting: 1, Poison: 0.5, Ground: 2, Flying: 0.5, Psychic: 1, Bug: 0.5, Rock: 2, Ghost: 1, Dragon: 0.5, Dark: 1, Steel: 0.5, Fairy: 1 },
+            Ice:      { Normal: 1, Fire: 0.5, Water: 0.5, Electric: 1, Grass: 2, Ice: 0.5, Fighting: 1, Poison: 1, Ground: 2, Flying: 2, Psychic: 1, Bug: 1, Rock: 1, Ghost: 1, Dragon: 2, Dark: 1, Steel: 0.5, Fairy: 1 },
+            Fighting: { Normal: 2, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 2, Fighting: 1, Poison: 0.5, Ground: 1, Flying: 0.5, Psychic: 0.5, Bug: 0.5, Rock: 2, Ghost: 0, Dragon: 1, Dark: 2, Steel: 2, Fairy: 0.5 },
+            Poison:   { Normal: 1, Fire: 1, Water: 1, Electric: 1, Grass: 2, Ice: 1, Fighting: 1, Poison: 0.5, Ground: 0.5, Flying: 1, Psychic: 1, Bug: 1, Rock: 0.5, Ghost: 0.5, Dragon: 1, Dark: 1, Steel: 0, Fairy: 2 },
+            Ground:   { Normal: 1, Fire: 2, Water: 1, Electric: 2, Grass: 0.5, Ice: 1, Fighting: 1, Poison: 2, Ground: 1, Flying: 0, Psychic: 1, Bug: 0.5, Rock: 2, Ghost: 1, Dragon: 1, Dark: 1, Steel: 2, Fairy: 1 },
+            Flying:   { Normal: 1, Fire: 1, Water: 1, Electric: 0.5, Grass: 2, Ice: 1, Fighting: 2, Poison: 1, Ground: 1, Flying: 1, Psychic: 1, Bug: 2, Rock: 0.5, Ghost: 1, Dragon: 1, Dark: 1, Steel: 0.5, Fairy: 1 },
+            Psychic:  { Normal: 1, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 2, Poison: 2, Ground: 1, Flying: 1, Psychic: 0.5, Bug: 1, Rock: 1, Ghost: 1, Dragon: 1, Dark: 0, Steel: 0.5, Fairy: 1 },
+            Bug:      { Normal: 1, Fire: 0.5, Water: 1, Electric: 1, Grass: 2, Ice: 1, Fighting: 0.5, Poison: 0.5, Ground: 1, Flying: 0.5, Psychic: 2, Bug: 1, Rock: 1, Ghost: 0.5, Dragon: 1, Dark: 2, Steel: 0.5, Fairy: 0.5 },
+            Rock:     { Normal: 1, Fire: 2, Water: 1, Electric: 1, Grass: 1, Ice: 2, Fighting: 0.5, Poison: 1, Ground: 0.5, Flying: 2, Psychic: 1, Bug: 2, Rock: 1, Ghost: 1, Dragon: 1, Dark: 1, Steel: 0.5, Fairy: 1 },
+            Ghost:    { Normal: 0, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 1, Poison: 1, Ground: 1, Flying: 1, Psychic: 2, Bug: 1, Rock: 1, Ghost: 2, Dragon: 1, Dark: 0.5, Steel: 1, Fairy: 1 },
+            Dragon:   { Normal: 1, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 1, Poison: 1, Ground: 1, Flying: 1, Psychic: 1, Bug: 1, Rock: 1, Ghost: 1, Dragon: 2, Dark: 1, Steel: 0.5, Fairy: 0 },
+            Dark:     { Normal: 1, Fire: 1, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 0.5, Poison: 1, Ground: 1, Flying: 1, Psychic: 2, Bug: 1, Rock: 1, Ghost: 2, Dragon: 1, Dark: 0.5, Steel: 1, Fairy: 0.5 },
+            Steel:    { Normal: 1, Fire: 0.5, Water: 0.5, Electric: 0.5, Grass: 1, Ice: 2, Fighting: 1, Poison: 1, Ground: 1, Flying: 1, Psychic: 1, Bug: 1, Rock: 2, Ghost: 1, Dragon: 1, Dark: 1, Steel: 0.5, Fairy: 2 },
+            Fairy:    { Normal: 1, Fire: 0.5, Water: 1, Electric: 1, Grass: 1, Ice: 1, Fighting: 2, Poison: 0.5, Ground: 1, Flying: 1, Psychic: 1, Bug: 1, Rock: 1, Ghost: 1, Dragon: 2, Dark: 2, Steel: 0.5, Fairy: 1 }
+        };
+
+        let tcSelectedType = 'Fire';
+
+        function renderTypeBadge(typeName, extraClasses = '') {
+            const cls = TYPE_COLORS[typeName] || 'bg-slate-700 text-white border-slate-500';
+            return `<span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap ${cls} ${extraClasses}">${typeName}</span>`;
+        }
+
+        function initTypeChart() {
+            const singleSelect = document.getElementById('tc-single-select');
+            const dualPrimary = document.getElementById('tc-dual-primary');
+            const dualSecondary = document.getElementById('tc-dual-secondary');
+            const pillsContainer = document.getElementById('tc-type-pills');
+
+            // Populate dropdowns
+            const typeOptionsHtml = ALL_18_TYPES.map(t => `<option value="${t}">${t}</option>`).join('');
+            singleSelect.innerHTML = typeOptionsHtml;
+            singleSelect.value = tcSelectedType;
+
+            dualPrimary.innerHTML = typeOptionsHtml;
+            dualPrimary.value = 'Dragon';
+
+            dualSecondary.innerHTML = `<option value="none">None (Mono-Type)</option>` + typeOptionsHtml;
+            dualSecondary.value = 'Flying';
+
+            // Populate quick type pills
+            pillsContainer.innerHTML = ALL_18_TYPES.map(t => {
+                const cls = TYPE_COLORS[t] || 'bg-slate-700 text-white border-slate-500';
+                return `<button type="button" data-tc-pill="${t}" class="tc-pill px-2.5 py-1 rounded-full text-[11px] font-bold border transition transform hover:scale-105 ${cls}">${t}</button>`;
+            }).join('');
+
+            pillsContainer.querySelectorAll('.tc-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tcSelectedType = btn.dataset.tcPill;
+                    singleSelect.value = tcSelectedType;
+                    updateSingleTypeInspector();
+                    applyMatrixSelectionHighlight();
+                });
+            });
+
+            singleSelect.addEventListener('change', (e) => {
+                tcSelectedType = e.target.value;
+                updateSingleTypeInspector();
+                applyMatrixSelectionHighlight();
+            });
+
+            document.getElementById('tc-clear-highlight').addEventListener('click', () => {
+                tcSelectedType = null;
+                applyMatrixSelectionHighlight();
+            });
+
+            dualPrimary.addEventListener('change', updateDualTypeCalculator);
+            dualSecondary.addEventListener('change', updateDualTypeCalculator);
+
+            document.getElementById('tc-swap-types').addEventListener('click', () => {
+                const p = dualPrimary.value;
+                const s = dualSecondary.value;
+                if (s !== 'none') {
+                    dualPrimary.value = s;
+                    dualSecondary.value = p;
+                    updateDualTypeCalculator();
+                }
+            });
+
+            renderTypeMatrixTable();
+            updateSingleTypeInspector();
+            updateDualTypeCalculator();
+            applyMatrixSelectionHighlight();
+        }
+
+        function updateSingleTypeInspector() {
+            const targetType = tcSelectedType || 'Fire';
+            const container = document.getElementById('tc-single-breakdown');
+
+            // Update pill rings
+            document.querySelectorAll('.tc-pill').forEach(btn => {
+                const active = btn.dataset.tcPill === tcSelectedType;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-amber-300', active);
+                btn.classList.toggle('scale-105', active);
+            });
+
+            // Offensive calculations (targetType attacking others)
+            const strongAgainst = ALL_18_TYPES.filter(def => TYPE_CHART[targetType][def] === 2);
+            const weakOffensively = ALL_18_TYPES.filter(def => TYPE_CHART[targetType][def] === 0.5);
+            const noEffectAgainst = ALL_18_TYPES.filter(def => TYPE_CHART[targetType][def] === 0);
+
+            // Defensive calculations (others attacking targetType)
+            const weakToDefensively = ALL_18_TYPES.filter(atk => TYPE_CHART[atk][targetType] === 2);
+            const resistsDefensively = ALL_18_TYPES.filter(atk => TYPE_CHART[atk][targetType] === 0.5);
+            const immuneToDefensively = ALL_18_TYPES.filter(atk => TYPE_CHART[atk][targetType] === 0);
+
+            const renderList = (arr, emptyMsg) => arr.length
+                ? arr.map(t => renderTypeBadge(t)).join(' ')
+                : `<span class="text-[11px] text-slate-500 italic">${emptyMsg}</span>`;
+
+            container.innerHTML = `
+                <div class="rounded-xl bg-slate-950/90 border border-slate-800 p-3 space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">⚔️ ${targetType} Attacking (Offense)</span>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase text-emerald-300 mb-1">Strong Against (2× Super Effective)</div>
+                        <div class="flex flex-wrap gap-1">${renderList(strongAgainst, 'None')}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase text-rose-300 mb-1">Weak Against Offensively (½× &amp; 0×)</div>
+                        <div class="flex flex-wrap gap-1">
+                            ${weakOffensively.map(t => renderTypeBadge(t)).join('')}
+                            ${noEffectAgainst.map(t => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-900 text-slate-300 border border-slate-600">${t} (0×)</span>`).join('')}
+                            ${weakOffensively.length === 0 && noEffectAgainst.length === 0 ? '<span class="text-[11px] text-slate-500 italic">None</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-slate-950/90 border border-slate-800 p-3 space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-300">🛡️ ${targetType} Defending (Defense)</span>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase text-rose-300 mb-1">Weak To Defensively (2× Damage Taken)</div>
+                        <div class="flex flex-wrap gap-1">${renderList(weakToDefensively, 'None')}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase text-emerald-300 mb-1">Resists (½×) &amp; Immune To (0×)</div>
+                        <div class="flex flex-wrap gap-1">
+                            ${resistsDefensively.map(t => renderTypeBadge(t)).join('')}
+                            ${immuneToDefensively.map(t => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/40">${t} (0×)</span>`).join('')}
+                            ${resistsDefensively.length === 0 && immuneToDefensively.length === 0 ? '<span class="text-[11px] text-slate-500 italic">None</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateDualTypeCalculator() {
+            const primary = document.getElementById('tc-dual-primary').value;
+            const secondary = document.getElementById('tc-dual-secondary').value;
+            const hasSecond = secondary !== 'none' && secondary !== primary;
+            const container = document.getElementById('tc-dual-results');
+
+            const buckets = {
+                4: [],
+                2: [],
+                1: [],
+                0.5: [],
+                0.25: [],
+                0: []
+            };
+
+            ALL_18_TYPES.forEach(atk => {
+                const m1 = TYPE_CHART[atk][primary];
+                const m2 = hasSecond ? TYPE_CHART[atk][secondary] : 1;
+                const combined = m1 * m2;
+                if (buckets[combined] !== undefined) {
+                    buckets[combined].push(atk);
+                }
+            });
+
+            const renderBucket = (label, badgeCls, items) => {
+                if (!items.length) return '';
+                return `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${badgeCls}">${label}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">(${items.length})</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${items.map(t => renderTypeBadge(t)).join('')}
+                        </div>
+                    </div>
+                `;
+            };
+
+            const weakBlocks = [
+                renderBucket('4× Double Weak', 'bg-rose-600/30 text-rose-200 border-rose-400/60', buckets[4]),
+                renderBucket('2× Weak', 'bg-rose-500/20 text-rose-300 border-rose-400/40', buckets[2])
+            ].filter(Boolean).join('');
+
+            const resistBlocks = [
+                renderBucket('0× Immune', 'bg-amber-500/25 text-amber-200 border-amber-400/50', buckets[0]),
+                renderBucket('¼× Double Resistant', 'bg-emerald-600/30 text-emerald-200 border-emerald-400/60', buckets[0.25]),
+                renderBucket('½× Resistant', 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40', buckets[0.5]),
+                renderBucket('1× Neutral', 'bg-slate-800 text-slate-300 border-slate-700', buckets[1])
+            ].filter(Boolean).join('');
+
+            container.innerHTML = `
+                <div class="rounded-xl bg-slate-950/90 border border-slate-800 p-3 space-y-2.5">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-rose-300 border-b border-slate-800/80 pb-1.5">
+                        ⚠️ Weaknesses (${buckets[4].length + buckets[2].length})
+                    </div>
+                    ${weakBlocks || '<p class="text-[11px] text-slate-500 italic">No weaknesses!</p>'}
+                </div>
+
+                <div class="rounded-xl bg-slate-950/90 border border-slate-800 p-3 space-y-2.5">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-300 border-b border-slate-800/80 pb-1.5">
+                        🛡️ Resistances, Immunities &amp; Neutral
+                    </div>
+                    ${resistBlocks}
+                </div>
+            `;
+        }
+
+        function renderTypeMatrixTable() {
+            const table = document.getElementById('tc-matrix-table');
+            const readout = document.getElementById('tc-hover-readout');
+
+            // Header Row (Defending Types)
+            let theadHtml = `
+                <thead>
+                    <tr>
+                        <th class="sticky top-0 left-0 z-30 bg-slate-950 border-b border-r border-slate-800 px-3 py-2.5 text-left min-w-[126px]">
+                            <div class="text-[9px] uppercase tracking-widest text-sky-300 font-extrabold text-right">Defending →</div>
+                            <div class="text-[9px] uppercase tracking-widest text-amber-300 font-extrabold">Attacking ↓</div>
+                        </th>
+            `;
+
+            ALL_18_TYPES.forEach((defType, colIdx) => {
+                const cls = TYPE_COLORS[defType] || 'bg-slate-700 text-white border-slate-500';
+                theadHtml += `
+                    <th data-col="${colIdx}" data-type="${defType}" class="tc-col-header sticky top-0 z-20 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 px-1.5 py-2.5 min-w-[66px] cursor-pointer hover:bg-slate-900 transition" title="Click to inspect ${defType}">
+                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${cls}">
+                            ${defType.slice(0, 3).toUpperCase()}
+                        </span>
+                        <div class="text-[9px] text-slate-400 font-semibold mt-0.5">${defType}</div>
+                    </th>
+                `;
+            });
+            theadHtml += `</tr></thead>`;
+
+            // Body Rows (Attacking Types)
+            let tbodyHtml = `<tbody>`;
+            ALL_18_TYPES.forEach((atkType, rowIdx) => {
+                const atkCls = TYPE_COLORS[atkType] || 'bg-slate-700 text-white border-slate-500';
+                tbodyHtml += `
+                    <tr data-row="${rowIdx}" data-type="${atkType}" class="tc-row border-b border-slate-800/70 transition-colors">
+                        <th data-row="${rowIdx}" data-type="${atkType}" class="tc-row-header sticky left-0 z-10 bg-slate-950/95 backdrop-blur-md border-r border-slate-800 px-3 py-2 text-left cursor-pointer hover:bg-slate-900 transition" title="Click to inspect ${atkType}">
+                            <span class="inline-flex items-center justify-center w-full px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${atkCls}">
+                                ${atkType}
+                            </span>
+                        </th>
+                `;
+
+                ALL_18_TYPES.forEach((defType, colIdx) => {
+                    const mult = TYPE_CHART[atkType][defType];
+                    let cellContent = `<span class="text-slate-600 font-medium">1×</span>`;
+                    if (mult === 2) {
+                        cellContent = `<span class="inline-flex items-center justify-center w-9 h-6 rounded-lg bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 font-extrabold text-[11px] shadow-sm">2×</span>`;
+                    } else if (mult === 0.5) {
+                        cellContent = `<span class="inline-flex items-center justify-center w-9 h-6 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-400/40 font-bold text-[11px]">½×</span>`;
+                    } else if (mult === 0) {
+                        cellContent = `<span class="inline-flex items-center justify-center w-9 h-6 rounded-lg bg-zinc-900 text-slate-400 border border-slate-700 font-bold text-[11px]">0×</span>`;
+                    }
+
+                    tbodyHtml += `
+                        <td data-row="${rowIdx}" data-col="${colIdx}" data-atk="${atkType}" data-def="${defType}" data-mult="${mult}" class="tc-cell border-r border-slate-800/40 px-1.5 py-1.5 transition-colors">
+                            ${cellContent}
+                        </td>
+                    `;
+                });
+
+                tbodyHtml += `</tr>`;
+            });
+            tbodyHtml += `</tbody>`;
+
+            table.innerHTML = theadHtml + tbodyHtml;
+
+            // Crosshair Hover Effects
+            table.querySelectorAll('.tc-cell').forEach(cell => {
+                cell.addEventListener('mouseenter', () => {
+                    const r = cell.dataset.row;
+                    const c = cell.dataset.col;
+                    const atk = cell.dataset.atk;
+                    const def = cell.dataset.def;
+                    const mult = parseFloat(cell.dataset.mult);
+
+                    table.querySelectorAll(`.tc-row[data-row="${r}"]`).forEach(el => el.classList.add('tc-row-active'));
+                    table.querySelectorAll(`[data-col="${c}"]`).forEach(el => el.classList.add('tc-col-active'));
+                    cell.classList.add('tc-cell-focus');
+
+                    const multLabel = mult === 2
+                        ? '<span class="text-emerald-300 font-extrabold">2× (Super Effective!)</span>'
+                        : mult === 0.5
+                            ? '<span class="text-rose-300 font-bold">½× (Not Very Effective)</span>'
+                            : mult === 0
+                                ? '<span class="text-slate-400 font-bold">0× (No Effect / Immune)</span>'
+                                : '<span class="text-slate-300 font-semibold">1× (Normal Damage)</span>';
+
+                    readout.innerHTML = `<span class="text-amber-300 font-bold">${atk}</span> move vs <span class="text-sky-300 font-bold">${def}</span> Pokémon → ${multLabel}`;
+                });
+
+                cell.addEventListener('mouseleave', () => {
+                    table.querySelectorAll('.tc-row-active').forEach(el => el.classList.remove('tc-row-active'));
+                    table.querySelectorAll('.tc-col-active').forEach(el => el.classList.remove('tc-col-active'));
+                    cell.classList.remove('tc-cell-focus');
+                });
+            });
+
+            // Clicking any row/column header selects that type in the Single-Type Inspector
+            table.querySelectorAll('.tc-row-header, .tc-col-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    tcSelectedType = header.dataset.type;
+                    document.getElementById('tc-single-select').value = tcSelectedType;
+                    updateSingleTypeInspector();
+                    applyMatrixSelectionHighlight();
+                });
+            });
+        }
+
+        function applyMatrixSelectionHighlight() {
+            const table = document.getElementById('tc-matrix-table');
+            if (!table) return;
+            table.querySelectorAll('.tc-selected-highlight').forEach(el => el.classList.remove('tc-selected-highlight'));
+            if (!tcSelectedType) return;
+
+            const idx = ALL_18_TYPES.indexOf(tcSelectedType);
+            if (idx === -1) return;
+
+            table.querySelectorAll(`.tc-row[data-row="${idx}"]`).forEach(el => el.classList.add('tc-selected-highlight'));
+            table.querySelectorAll(`[data-col="${idx}"]`).forEach(el => el.classList.add('tc-selected-highlight'));
+        }
+
         function initPokedexEvents() {
             document.getElementById('mode-tree-btn').addEventListener('click', () => switchAppMode('tree'));
             document.getElementById('mode-dex-btn').addEventListener('click', () => switchAppMode('dex'));
             document.getElementById('mode-quiz-btn').addEventListener('click', () => switchAppMode('quiz'));
+            document.getElementById('mode-types-btn').addEventListener('click', () => switchAppMode('types'));
             document.getElementById('quiz-new-btn').addEventListener('click', nextQuizQuestion);
             document.getElementById('quiz-category').addEventListener('change', () => {
                 quizCurrentQuestion = null;
@@ -2943,6 +3440,7 @@
             renderNodes();
             initInteractions();
             initPokedexEvents();
+            initTypeChart();
             focusRegion('all');
         };
     </script>
